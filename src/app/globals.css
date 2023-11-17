@@ -2,3 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
+.map-container .ol-layer canvas {
+    filter: grayscale(100%);
+}
+

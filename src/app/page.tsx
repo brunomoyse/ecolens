@@ -1,9 +1,9 @@
-import Image from 'next/image'
+import MapComponent from "@/components/map";
 
 export default function Home() {
   return (
     <main className="flex min-h-screen">
-      <div className="bg-amber-500">Salut</div>
+      <MapComponent />
     </main>
   )
 }
