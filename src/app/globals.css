@@ -2,7 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
-.map-container .ol-layer canvas {
+.osm-layer {
     filter: grayscale(100%);
 }
 
+.wallonia-pre-layer {
+    filter: sepia(50%) hue-rotate(-70deg) saturate(250%) brightness(100%);
+}
