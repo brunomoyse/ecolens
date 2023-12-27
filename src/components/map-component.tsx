@@ -9,6 +9,7 @@ import {useEffect, useState} from 'react';
 import {fromLonLat, Projection} from 'ol/proj';
 
 import geoJsonLayer from './map/geojson-layer';
+import vectorTileLayer from './map/vector-tile-layer';
 import {useMap} from "@/context/map-context";
 import { Pointer as PointerInteraction } from 'ol/interaction';
 import { Feature } from 'ol';
@@ -44,7 +45,7 @@ export default function MapComponent() {
             console.log('Map is ready');
             // Perform any additional setup or add layers if necessary
             map.setTarget('map');
-            map.setLayers([osmLayer, geoJsonLayer]);
+            map.setLayers([osmLayer, geoJsonLayer, vectorTileLayer]);
             map.setView(namurCenteredView);
         }
     }, [map]);
