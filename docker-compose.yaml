@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+  frontend:
+    build:
+      context: frontend
+    working_dir: /home/node/app
+    volumes:
+      - "./frontend/:/home/node/app"
+    ports:
+      - "3000:3000"
+    command: >
+      bash -c "npm i
+      && npm run dev"
+  martin:
+    image: maplibre/martin
+    ports:
+      - 4000:3000
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      # - "DATABASE_URL=postgresql://postgres:postgres@postgres:5432/postgres"
