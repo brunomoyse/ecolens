@@ -3,7 +3,7 @@ version: '3'
 services:
   frontend:
     build:
-      context: frontend
+      context: ./frontend
     working_dir: /home/node/app
     volumes:
       - "./frontend/:/home/node/app"
@@ -19,3 +19,27 @@ services:
     environment:
       - DATABASE_URL=${DATABASE_URL}
       # - "DATABASE_URL=postgresql://postgres:postgres@postgres:5432/postgres"
+  django:
+    build:
+      context: ./django
+    ports:
+      - "8000:8000"
+    volumes:
+      - "./django:/usr/src/app"
+    environment:
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    # command: bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    command: python manage.py runserver 0.0.0.0:8000
+  # postgis:
+  #   image: postgis/postgis:16-master
+  #   environment:
+  #     - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+  #   volumes:
+  #     - "./db/data:/var/lib/postgresql/data"
+  #     - "./db/init-scripts:/docker-entrypoint-initdb.d"
+  #   ports:
+  #     - "5432:5432"
