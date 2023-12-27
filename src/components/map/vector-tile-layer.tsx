@@ -7,7 +7,7 @@ const vectorTileLayer = new VectorTileLayer({
     source: new VectorTileSource({
       format: new MVT(),
       url:
-      'http://141.94.31.3:4000/pae_occupes_charleroi/{z}/{x}/{y}'
+      `${process.env.NEXT_PUBLIC_MAP_SERVER_ENDPOINT!}/pae_occupes_charleroi/{z}/{x}/{y}`
     })
 });
 
