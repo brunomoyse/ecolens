@@ -5,17 +5,11 @@ import 'ol/ol.css';
 import View from 'ol/View.js';
 import OSM from 'ol/source/OSM.js';
 import TileLayer from 'ol/layer/Tile.js';
-import {useEffect, useState} from 'react';
-import {fromLonLat, Projection} from 'ol/proj';
+import { useEffect, useState } from 'react';
+import { fromLonLat } from 'ol/proj';
+import { useMap } from "@/context/map-context";
 
-import geoJsonLayer from './map/geojson-layer';
-import vectorTileLayer from './map/vector-tile-layer';
-import {useMap} from "@/context/map-context";
-import { Pointer as PointerInteraction } from 'ol/interaction';
-import { Feature } from 'ol';
-
-import { hoverPolygonStyle } from "./map/geojson-layer";
-import {Coordinate, Pixel} from "openlayers";
+import vectorTileLayer, { polygonStyle, selectedPolygonStyle } from './map/vector-tile-layer';
 
 // Namur's geographic coordinates (WGS84)
 const namurGeoCoords = [4.8717, 50.4670];
@@ -32,53 +26,37 @@ const osmLayer = new TileLayer({
 });
 
 export default function MapComponent() {
-    const {  map } = useMap(); // Get the setMap function from context
-
-    const [hoverInfo, setHoverInfo] = useState<{ [key: string]: any } | null>(null);
-    const [hoverPosition, setHoverPosition] =  useState<Pixel | null>(null);
+    const { map } = useMap();
+    const [selectedFeatureId, setSelectedFeatureId] = useState(null);
 
     useEffect(() => {
-        if (map) {
-            console.log('Map is ready');
-            // Perform any additional setup or add layers if necessary
-            map.setTarget('map');
-            map.setLayers([osmLayer, geoJsonLayer, vectorTileLayer]);
-            map.setView(namurCenteredView);
-        }
-    }, [map]);
+        if (!map) return;
 
-    useEffect(() => {
-        if (map) {
-            let hoveredFeature: Feature|null = null;
+        map.setTarget('map');
+        map.setLayers([osmLayer, vectorTileLayer]);
+        map.setView(namurCenteredView);
 
-            map.addInteraction(new PointerInteraction({
-                handleMoveEvent: (evt) => {
-                    if (hoveredFeature) {
-                        hoveredFeature.setStyle(undefined); // Reset style
-                        hoveredFeature = null;
-                    }
-
-                    map.forEachFeatureAtPixel(evt.pixel, (feature, layer) => {
-                        if (layer && layer.get('title') === 'wallonia-pre') {
-                            if (feature instanceof Feature) {
-                                // Set OL style
-                                hoveredFeature = feature;
-                                feature.setStyle(hoverPolygonStyle);
-
-                                // Set hover info
-                                const properties = feature.getProperties();
-                                setHoverInfo(properties);
-                                const coordinates = evt.coordinate;
-                                const pixel = map.getPixelFromCoordinate(coordinates) as Pixel;
-                                setHoverPosition(pixel);
-                                return true; // Stop iteration
-                            }
-                        }
-                    });
+        // Click interaction
+        map.on('click', function (evt) {
+            map.forEachFeatureAtPixel(evt.pixel, (feature, layer) => {
+                if (layer === vectorTileLayer) {
+                    const gid = feature.getProperties()?.gid;
+                    setSelectedFeatureId(gid);
                 }
-            }));
-        }
+            });
+        });
     }, [map]);
+
+    useEffect(() => {
+        vectorTileLayer.setStyle(function(feature) {
+            if (feature.getProperties()?.gid === selectedFeatureId) {
+                return selectedPolygonStyle;
+            }
+            return polygonStyle;
+        });
+
+        vectorTileLayer.changed(); // Force layer redraw
+    }, [selectedFeatureId]);
 
     return (
         <div id="map" className="map-container min-h-max w-full" />
