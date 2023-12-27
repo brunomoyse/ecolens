@@ -13,10 +13,9 @@ import vectorTileLayer from './map/vector-tile-layer';
 import {useMap} from "@/context/map-context";
 import { Pointer as PointerInteraction } from 'ol/interaction';
 import { Feature } from 'ol';
-import Style from 'ol/style/Style';
 
 import { hoverPolygonStyle } from "./map/geojson-layer";
-import { FeatureLike } from "ol/Feature";
+import {Coordinate, Pixel} from "openlayers";
 
 // Namur's geographic coordinates (WGS84)
 const namurGeoCoords = [4.8717, 50.4670];
@@ -32,13 +31,11 @@ const osmLayer = new TileLayer({
     className: 'osm-layer' // Custom class name
 });
 
-
-
 export default function MapComponent() {
     const {  map } = useMap(); // Get the setMap function from context
 
-    const [hoverInfo, setHoverInfo] = useState(null);
-    const [hoverPosition, setHoverPosition] = useState(null);
+    const [hoverInfo, setHoverInfo] = useState<{ [key: string]: any } | null>(null);
+    const [hoverPosition, setHoverPosition] =  useState<Pixel | null>(null);
 
     useEffect(() => {
         if (map) {
@@ -67,9 +64,13 @@ export default function MapComponent() {
                                 // Set OL style
                                 hoveredFeature = feature;
                                 feature.setStyle(hoverPolygonStyle);
+
                                 // Set hover info
-                                setHoverInfo(feature.getProperties());
-                                setHoverPosition(map.getPixelFromCoordinate(evt.coordinate));
+                                const properties = feature.getProperties();
+                                setHoverInfo(properties);
+                                const coordinates = evt.coordinate;
+                                const pixel = map.getPixelFromCoordinate(coordinates) as Pixel;
+                                setHoverPosition(pixel);
                                 return true; // Stop iteration
                             }
                         }
