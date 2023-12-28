@@ -32,12 +32,14 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'api.apps.ApiConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'graphene_django',
 ]
 
 MIDDLEWARE = [
@@ -76,7 +78,7 @@ WSGI_APPLICATION = 'ecolens.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
+        "ENGINE": "django.contrib.gis.db.backends.postgis",
         'OPTIONS': {
             'options': '-c search_path=django,public'
         },
@@ -129,3 +131,7 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+GRAPHENE = {
+    "SCHEMA": "ecolens.schema.schema"
+}
