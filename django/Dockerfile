@@ -1,6 +1,11 @@
 # pull official base image
 FROM python:3.11.4-slim-buster
 
+# install GDAL
+RUN apt-get update && apt-get install -y \
+    libgdal-dev && \
+    rm -rf /var/lib/apt/lists/*
+
 # set work directory
 WORKDIR /usr/src/app
 
