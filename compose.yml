@@ -18,10 +18,10 @@ services:
       - 4000:3000
     environment:
       - DATABASE_URL=${DATABASE_URL}
-      # - "DATABASE_URL=postgresql://postgres:postgres@postgres:5432/postgres"
   django:
     build:
       context: ./django
+    image: ecolens/django
     ports:
       - "8000:8000"
     volumes:
@@ -32,6 +32,8 @@ services:
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - DEBUG=1
+      #  - ALLOWED_HOST=${SERVER_IP}
     # command: bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     command: python manage.py runserver 0.0.0.0:8000
   # postgis:
