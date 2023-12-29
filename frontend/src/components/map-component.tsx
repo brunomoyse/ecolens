@@ -26,15 +26,18 @@ const osmLayer = new TileLayer({
 });
 
 export default function MapComponent() {
-    const { map } = useMap();
+    const { map, addLayer } = useMap();
     const [selectedFeatureId, setSelectedFeatureId] = useState(null);
 
     useEffect(() => {
         if (!map) return;
 
         map.setTarget('map');
-        map.setLayers([osmLayer, vectorTileLayer]);
         map.setView(namurCenteredView);
+        map.setLayers([osmLayer]);
+
+        // Add base layers using addLayer from context
+        addLayer(vectorTileLayer);
 
         // Click interaction
         map.on('click', function (evt) {
