@@ -15,7 +15,9 @@ import {
 
 import {createTileLayerFromUrl} from "@/lib/utils"
 
-import {geoPortalService} from "@/types"
+import {geoPortalService, legendArcGis} from "@/types"
+import BaseLayer from "ol/layer/Base";
+import {Collection, getUid} from "ol";
 
 const geoPortalBaseUrl: string = 'https://geoservices.wallonie.be/arcgis/rest/services/';
 const getJsonResponse: string = '?f=json';
@@ -39,15 +41,26 @@ const getSubCategories = async (selectedCategory: string): Promise<geoPortalServ
     return json.folders ? json.services : [];
 }
 
+const getLegendArcGis = async (category: string, subCategory: string) => {
+    const url: string = geoPortalBaseUrl + category + '/' + subCategory + '/MapServer' + '/legend' + getJsonResponse;
+    const res = await fetch(url);
+    const data: legendArcGis = await res.json();
+};
+
 export default function Home() {
-    const { map } = useMap();
-    const [isLayerVisible, setIsLayerVisible] = useState(true);
+    const { map, layers, addLayer, toggleLayerVisibility } = useMap();
 
     const [categories, setCategories] = useState<string[]>([]);
     const [selectedCategory, setSelectedCategory] = useState<string|null>(null);
     const [subCategories, setSubCategories] = useState<geoPortalService[]>([]);
     const [selectedSubCategory, setSelectedSubCategory] = useState<string|null>(null);
 
+    const [selectedLegend, setSelectedLegend] = useState<legendArcGis|null>(null);
+    const [layersList, setLayersList] = useState<BaseLayer[]>([])
+
+    useEffect(() => {
+        getCategories().then(setCategories)
+    }, []);
 
     const handleCategoryChange = (category: string) => {
         setSelectedCategory(category);
@@ -56,33 +69,17 @@ export default function Home() {
     }
 
     const handleSubCategoryChange = (subcategory: string) => {
-        setSelectedSubCategory(subcategory);
         let arcGisUrl = geoPortalBaseUrl + selectedCategory + '/' + subcategory + '/' + 'MapServer'
         const newTileLayer = createTileLayerFromUrl(arcGisUrl);
-        map?.addLayer(newTileLayer);
+        newTileLayer.set('title', subcategory)
+        addLayer(newTileLayer);
+        setSelectedSubCategory(subcategory);
     }
-
-    useEffect(() => {
-        getCategories().then(setCategories)
-    }, []);
-
-    // Toggle function to show/hide layers
-    const toggleLayerVisibility = (title: string) => {
-        if (!map) return;
-        setIsLayerVisible(!isLayerVisible);
-        const layer = map.getLayers().getArray()
-            .find(layer => layer.get('title') === 'pae-charleroi');
-        if (layer) {
-            layer.setVisible(!isLayerVisible);
-        }
-    };
-
-    let listOfLayersTitle = ['pae-charleroi']
 
     return (
         <main className="flex min-h-screen max-h-screen">
             <aside className="w-1/4 bg-gray-200 p-4 shadow-lg">
-                <h2 className="text-2xl font-bold text-center my-4">Layers</h2>
+                <h2 className="text-2xl font-bold text-center my-4">Couches</h2>
                 {/* GeoPortal categories */}
                 <div className="my-2">
                     <Select onValueChange={handleCategoryChange}>
@@ -113,14 +110,14 @@ export default function Home() {
                     </SelectContent>
                 </Select>)}
 
-                {listOfLayersTitle.map((title) => (
-                    <div key={title} className="space-y-4 my-2">
-                        <div onClick={() => toggleLayerVisibility(title)}
+                {layers && layers.length > 0 && layers.map((baseLayer) => (
+                    <div key={baseLayer.get('title')} className="space-y-4 my-2">
+                        <div onClick={() => toggleLayerVisibility(baseLayer)}
                              className="flex items-center p-2 hover:bg-gray-300 rounded-lg cursor-pointer">
-                            <span className="ml-2">{title}</span>
+                            <span className="ml-2">{baseLayer.get('title')}</span>
                             <button className="ml-auto">
                                 {/* Toggle Icon */}
-                                {isLayerVisible ? <Eye /> : <EyeOff />}
+                                {baseLayer.getVisible() ? <Eye /> : <EyeOff />}
                             </button>
                         </div>
                     </div>
