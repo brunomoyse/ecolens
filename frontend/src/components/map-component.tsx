@@ -18,7 +18,7 @@ const namurGeoCoords = [4.8717, 50.4670];
 // Namur's centered view
 const namurCenteredView = new View({
     center: fromLonLat(namurGeoCoords),
-    zoom: 8
+    zoom: 8.68
 });
 
 const osmLayer = new TileLayer({
@@ -50,7 +50,7 @@ export default function MapComponent() {
                 }
             });
         });
-    }, [map]);
+    }, [map]); // @ts-ignore-line
 
     useEffect(() => {
         vectorTileLayer.setStyle(function(feature) {
