@@ -10,6 +10,7 @@ import { fromLonLat } from 'ol/proj';
 import { useMap } from "@/context/map-context";
 
 import vectorTileLayer, { polygonStyle, selectedPolygonStyle } from './map/vector-tile-layer';
+import geoJsonLayer from "./map/geojson-layer";
 
 // Namur's geographic coordinates (WGS84)
 const namurGeoCoords = [4.8717, 50.4670];
@@ -38,6 +39,7 @@ export default function MapComponent() {
 
         // Add base layers using addLayer from context
         addLayer(vectorTileLayer);
+        addLayer(geoJsonLayer);
 
         // Click interaction
         map.on('click', function (evt) {
