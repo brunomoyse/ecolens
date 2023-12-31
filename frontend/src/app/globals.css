@@ -78,3 +78,12 @@
 .osm-layer {
   filter: grayscale(100%);
 }
+
+.left-panel {
+  transition: transform 0.8s ease-in-out;
+  transform: translateX(-100%);
+}
+
+.left-panel.visible {
+  transform: translateX(0);
+}

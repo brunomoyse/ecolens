@@ -42,7 +42,11 @@ const getLegendArcGis = async (category: string, subCategory: string) => {
     const data: legendArcGis = await res.json();
 };
 
-export default function LeftPanel() {
+interface LeftPanelProps {
+    isVisible: boolean
+}
+
+export default function LeftPanel({ isVisible }: LeftPanelProps) {
     const { map, layers, addLayer, toggleLayerVisibility } = useMap();
 
     const [categories, setCategories] = useState<string[]>([]);
@@ -72,7 +76,7 @@ export default function LeftPanel() {
     }
 
     return (
-        <aside className="w-1/4 bg-gray-200 p-4 shadow-lg">
+        <aside className={`fixed z-20 h-full w-1/4 bg-gray-200 p-4 shadow-lg left-panel ${isVisible ? 'visible' : ''}`}>
             <h2 className="text-2xl font-bold text-center my-4">Couches</h2>
             {/* GeoPortal categories */}
             <div className="my-2">
