@@ -1,15 +1,22 @@
 // home.tsx
 "use client";
 
-import MapComponent from "@/components/map-component";
-import LeftPanel from "@/components/panels/left-panel";
-import BottomButtons from "@/components/panels/bottom-buttons";
+import React, { useState } from 'react';
+import MapComponent from "@/components/MapComponent";
+import BarButtons from "@/components/panels/BarButtons";
+import LeftPanel from "@/components/panels/LeftPanel";
 
 export default function Home() {
+    const [isLeftPanelVisible, setIsLeftPanelVisible] = useState(false);
+
+    const toggleLeftPanel = () => {
+        setIsLeftPanelVisible(!isLeftPanelVisible);
+    }
+
     return (
         <main className="flex min-h-screen max-h-screen">
-            <BottomButtons/>
-            <LeftPanel/>
+            <BarButtons onToggleLeftPanel={toggleLeftPanel} />
+            <LeftPanel isVisible={isLeftPanelVisible} />
             <MapComponent/>
         </main>
     )

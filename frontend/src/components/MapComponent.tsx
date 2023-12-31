@@ -1,4 +1,4 @@
-// map-component.tsx
+// MapComponent.tsx
 "use client";
 
 import 'ol/ol.css';
@@ -9,8 +9,8 @@ import { useEffect, useState } from 'react';
 import { fromLonLat } from 'ol/proj';
 import { useMap } from "@/context/map-context";
 
-import vectorTileLayer, { polygonStyle, selectedPolygonStyle } from './map/vector-tile-layer';
-import geoJsonLayer from "./map/geojson-layer";
+import { createVectorTileLayer, defaultSelectedPolygonStyle, defaultPolygonStyle } from './map/VectorTileLayer';
+import { createGeoJsonLayer } from "./map/GeoJsonLayer";
 
 // Namur's geographic coordinates (WGS84)
 const namurGeoCoords = [4.8717, 50.4670];
@@ -30,6 +30,16 @@ export default function MapComponent() {
     const { map, addLayer } = useMap();
     const [selectedFeatureId, setSelectedFeatureId] = useState(null);
 
+    const paeLayer = createVectorTileLayer(
+        `${process.env.NEXT_PUBLIC_MAP_SERVER_ENDPOINT!}/pae_occupes_charleroi/{z}/{x}/{y}`,
+        'Parc d\'activités'
+    )
+
+    const intercomLimitsLayer = createGeoJsonLayer(
+        'geojsons/limite-intercommunales.geojson',
+        'Délimitation intercommunales',
+    );
+
     useEffect(() => {
         if (!map) return;
 
@@ -38,29 +48,29 @@ export default function MapComponent() {
         map.setLayers([osmLayer]);
 
         // Add base layers using addLayer from context
-        addLayer(vectorTileLayer);
-        addLayer(geoJsonLayer);
+        addLayer(paeLayer);
+        addLayer(intercomLimitsLayer);
 
         // Click interaction
         map.on('click', function (evt) {
             map.forEachFeatureAtPixel(evt.pixel, (feature, layer) => {
-                if (layer === vectorTileLayer) {
+                if (layer === paeLayer) {
                     const gid = feature.getProperties()?.gid;
                     setSelectedFeatureId(gid);
                 }
             });
         });
-    }, [map]); // @ts-ignore-line
+    }, [map]);
 
     useEffect(() => {
-        vectorTileLayer.setStyle(function(feature) {
+        paeLayer.setStyle(function(feature) {
             if (feature.getProperties()?.gid === selectedFeatureId) {
-                return selectedPolygonStyle;
+                return defaultSelectedPolygonStyle;
             }
-            return polygonStyle;
+            return defaultPolygonStyle;
         });
 
-        vectorTileLayer.changed(); // Force layer redraw
+        paeLayer.changed(); // Force layer redraw
     }, [selectedFeatureId]);
 
     return (
