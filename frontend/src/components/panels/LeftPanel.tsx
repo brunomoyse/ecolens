@@ -14,6 +14,13 @@ import {createTileLayerFromUrl} from "@/lib/utils"
 import {geoPortalService, legendArcGis} from "@/types"
 import BaseLayer from "ol/layer/Base";
 
+// to delete
+const getLegendTest = async () => {
+    const response = await fetch('https://geoservices.wallonie.be/arcgis/rest/services/AMENAGEMENT_TERRITOIRE/PRE/MapServer/legend?f=pjson');
+    const legendData = await response.json();
+    return legendData as legendArcGis;
+};
+
 const geoPortalBaseUrl: string = 'https://geoservices.wallonie.be/arcgis/rest/services/';
 const getJsonResponse: string = '?f=json';
 
@@ -56,9 +63,20 @@ export default function LeftPanel({ isVisible }: LeftPanelProps) {
 
     const [selectedLegend, setSelectedLegend] = useState<legendArcGis|null>(null);
     const [layersList, setLayersList] = useState<BaseLayer[]>([])
+    const [legendData, setLegendData] = useState<legendArcGis|null>(null);
 
     useEffect(() => {
         getCategories().then(setCategories)
+    }, []);
+
+
+    useEffect(() => {
+        const fetchLegend = async () => {
+            const data = await getLegendTest();
+            setLegendData(data);
+        };
+
+        fetchLegend();
     }, []);
 
     const handleCategoryChange = (category: string) => {
@@ -112,12 +130,22 @@ export default function LeftPanel({ isVisible }: LeftPanelProps) {
                 <div key={baseLayer.get('title')} className="space-y-4 my-2">
                     <div onClick={() => toggleLayerVisibility(baseLayer)}
                          className="flex items-center p-2 hover:bg-gray-300 rounded-lg cursor-pointer">
-                        <span className="ml-2">{baseLayer.get('title')}</span>
+                        <span>{baseLayer.get('title')}</span>
                         <button className="ml-auto">
                             {/* Toggle Icon */}
                             {baseLayer.getVisible() ? <Eye/> : <EyeOff/>}
                         </button>
                     </div>
+                </div>
+            ))}
+
+            {legendData && legendData && legendData.layers[0].legend.map((legendItem) => (
+                <div key={legendItem.url} className="flex items-center justify-between p-1">
+                    <span
+                        className="border-l-2 border-gray-400 pl-2">{legendItem.label}</span>
+                    <img
+                        src={`data:image/png;base64, ${legendItem.imageData}`}
+                        alt={legendItem.label ?? ''}/>
                 </div>
             ))}
         </aside>
