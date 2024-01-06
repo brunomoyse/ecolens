@@ -138,16 +138,18 @@ export default function LeftPanel({ isVisible }: LeftPanelProps) {
                     </div>
                 </div>
             ))}
-
+            {/*
             {legendData && legendData && legendData.layers[0].legend.map((legendItem) => (
                 <div key={legendItem.url} className="flex items-center justify-between p-1">
                     <span
                         className="border-l-2 border-gray-400 pl-2">{legendItem.label}</span>
                     <img
+                        draggable={false}
                         src={`data:image/png;base64, ${legendItem.imageData}`}
                         alt={legendItem.label ?? ''}/>
                 </div>
             ))}
+            */}
         </aside>
     );
 }

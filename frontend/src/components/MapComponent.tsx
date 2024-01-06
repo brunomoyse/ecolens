@@ -9,8 +9,9 @@ import { useEffect, useState } from 'react';
 import { fromLonLat } from 'ol/proj';
 import { useMap } from "@/context/map-context";
 
-import { createVectorTileLayer, defaultSelectedPolygonStyle, defaultPolygonStyle } from './map/VectorTileLayer';
+import { createVectorTileLayer, defaultPolygonStyle, defaultPointStyle } from './map/VectorTileLayer';
 import { createGeoJsonLayer } from "./map/GeoJsonLayer";
+import DialogMap from "@/components/dialogs/DialogMap";
 
 // Namur's geographic coordinates (WGS84)
 const namurGeoCoords = [4.8717, 50.4670];
@@ -28,11 +29,23 @@ const osmLayer = new TileLayer({
 
 export default function MapComponent() {
     const { map, addLayer } = useMap();
-    const [selectedFeatureId, setSelectedFeatureId] = useState(null);
+    const [selectedPre, setSelectedPre] = useState< { [x: string]: any; }|null>(null);
+    const [selectedEnterprise, setSelectedEnterprise] = useState< { [x: string]: any; }|null>(null);
 
-    const paeLayer = createVectorTileLayer(
-        `${process.env.NEXT_PUBLIC_MAP_SERVER_ENDPOINT!}/pae_occupes_charleroi/{z}/{x}/{y}`,
-        'Parc d\'activités'
+    const [popupInfo, setPopupInfo] = useState< { [x: string]: any; }|null>(null);
+    const [popupCoordinate, setPopupCoordinate] = useState<[number, number] | undefined>(undefined);
+
+    const preLayer = createVectorTileLayer(
+        `${process.env.NEXT_PUBLIC_MAP_SERVER_ENDPOINT!}/geoportail_amenagement_territoire_pre/{z}/{x}/{y}`,
+        'PRE',
+        defaultPolygonStyle
+    )
+
+    const enterpriseLayer = createVectorTileLayer(
+        `${process.env.NEXT_PUBLIC_MAP_SERVER_ENDPOINT!}/hainaut_establishment_view/{z}/{x}/{y}`,
+        'Entreprises',
+        defaultPointStyle,
+        14
     )
 
     const intercomLimitsLayer = createGeoJsonLayer(
@@ -48,32 +61,31 @@ export default function MapComponent() {
         map.setLayers([osmLayer]);
 
         // Add base layers using addLayer from context
-        addLayer(paeLayer);
         addLayer(intercomLimitsLayer);
+        addLayer(preLayer);
+        addLayer(enterpriseLayer);
 
         // Click interaction
         map.on('click', function (evt) {
             map.forEachFeatureAtPixel(evt.pixel, (feature, layer) => {
-                if (layer === paeLayer) {
-                    const gid = feature.getProperties()?.gid;
-                    setSelectedFeatureId(gid);
+                if (layer === preLayer) {
+                    setSelectedPre(feature.getProperties());
+                } else if (layer === enterpriseLayer) {
+                    setSelectedEnterprise(feature.getProperties());
+                    setPopupInfo(feature.getProperties());
+                    const pixel = map.getPixelFromCoordinate(evt.coordinate);
+                    if (pixel) {
+                        setPopupCoordinate([pixel[0], pixel[1]]);
+                    } else {
+                        setPopupCoordinate(undefined);
+                    }
                 }
             });
         });
     }, [map]);
 
-    useEffect(() => {
-        paeLayer.setStyle(function(feature) {
-            if (feature.getProperties()?.gid === selectedFeatureId) {
-                return defaultSelectedPolygonStyle;
-            }
-            return defaultPolygonStyle;
-        });
-
-        paeLayer.changed(); // Force layer redraw
-    }, [selectedFeatureId]);
-
     return (
-        <div id="map" className="map-container min-h-max w-full" />
-    );
+        <div id="map" className="map-container min-h-max w-full">
+            {popupInfo && <DialogMap data={popupInfo} coordinate={popupCoordinate}/>}
+        </div>);
 }
