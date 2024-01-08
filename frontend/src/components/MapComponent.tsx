@@ -11,7 +11,8 @@ import { useMap } from "@/context/map-context";
 
 import { createVectorTileLayer, defaultPolygonStyle, defaultPointStyle } from './map/VectorTileLayer';
 import { createGeoJsonLayer } from "./map/GeoJsonLayer";
-import DialogMap from "@/components/dialogs/DialogMap";
+import DialogMap from "@/components/cards/PreviewCard";
+import {enterpriseDetails} from "@/types";
 
 // Namur's geographic coordinates (WGS84)
 const namurGeoCoords = [4.8717, 50.4670];
@@ -32,8 +33,8 @@ export default function MapComponent() {
     const [selectedPre, setSelectedPre] = useState< { [x: string]: any; }|null>(null);
     const [selectedEnterprise, setSelectedEnterprise] = useState< { [x: string]: any; }|null>(null);
 
-    const [popupInfo, setPopupInfo] = useState< { [x: string]: any; }|null>(null);
-    const [popupCoordinate, setPopupCoordinate] = useState<[number, number] | undefined>(undefined);
+    const [previewCardInfo, setPreviewCardInfo] = useState<enterpriseDetails|null>(null);
+    const [previewCardCoordinate, setPreviewCardCoordinate] = useState<[number, number] | undefined>(undefined);
 
     const preLayer = createVectorTileLayer(
         `${process.env.NEXT_PUBLIC_MAP_SERVER_ENDPOINT!}/geoportail_amenagement_territoire_pre/{z}/{x}/{y}`,
@@ -72,20 +73,27 @@ export default function MapComponent() {
                     setSelectedPre(feature.getProperties());
                 } else if (layer === enterpriseLayer) {
                     setSelectedEnterprise(feature.getProperties());
-                    setPopupInfo(feature.getProperties());
+                    setPreviewCardInfo(feature.getProperties() as enterpriseDetails);
                     const pixel = map.getPixelFromCoordinate(evt.coordinate);
                     if (pixel) {
-                        setPopupCoordinate([pixel[0], pixel[1]]);
+                        setPreviewCardCoordinate([pixel[0], pixel[1]]);
                     } else {
-                        setPopupCoordinate(undefined);
+                        setPreviewCardCoordinate(undefined);
                     }
                 }
             });
+        });
+
+        map.on('movestart', function () {
+            // Reset the selected feature when the map is moved
+            setPreviewCardInfo(null);
+            setPreviewCardCoordinate(undefined);
         });
     }, [map]);
 
     return (
         <div id="map" className="map-container min-h-max w-full">
-            {popupInfo && <DialogMap data={popupInfo} coordinate={popupCoordinate}/>}
+            {map && previewCardInfo && <DialogMap data={previewCardInfo} coordinate={previewCardCoordinate}/>}
         </div>);
+
 }
