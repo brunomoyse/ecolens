@@ -43,7 +43,7 @@ export default function MapComponent() {
     )
 
     const enterpriseLayer = createVectorTileLayer(
-        `${process.env.NEXT_PUBLIC_MAP_SERVER_ENDPOINT!}/hainaut_establishment_view/{z}/{x}/{y}`,
+        `${process.env.NEXT_PUBLIC_MAP_SERVER_ENDPOINT!}/function_zxy_kbo_hainaut_establishment/{z}/{x}/{y}?type_of_enterprise=Personne%20morale`,
         'Entreprises',
         defaultPointStyle,
         14
