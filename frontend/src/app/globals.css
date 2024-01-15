@@ -84,6 +84,19 @@
   transform: translateX(-100%);
 }
 
+.bottom-panel {
+  transition: transform 0.8s ease-in-out;
+  transform: translateY(200%);
+}
+
+.buttons-bar {
+  transition: 0.8s ease-in-out;
+}
+
 .left-panel.visible {
   transform: translateX(0);
+}
+
+.bottom-panel.visible {
+  transform: translateY(0);
 }
