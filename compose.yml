@@ -40,6 +40,19 @@ services:
       #  - ALLOWED_HOST=${SERVER_IP}
     # command: bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     command: python manage.py runserver 0.0.0.0:8000
+
+  celery:
+    image: ecolens/django
+    volumes:
+      - "./django:/usr/src/app"
+    environment:
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    command: celery -A ecolens worker -l info
+
   # postgis:
   #   image: postgis/postgis:16-master
   #   environment:
