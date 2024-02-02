@@ -1,0 +1,11 @@
+:80
+
+# Redirection vers le port 3000 pour tous les chemins sauf /admin
+handle_path /admin* {
+    reverse_proxy django:8000
+}
+
+# Redirection vers le port 3000 pour tous les autres chemins
+handle_path / {
+    reverse_proxy frontend:3000
+}
