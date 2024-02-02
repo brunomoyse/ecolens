@@ -81,7 +81,7 @@ DATABASES = {
     'default': {
         "ENGINE": "django.contrib.gis.db.backends.postgis",
         'OPTIONS': {
-            'options': '-c search_path=django,public,kbo'
+            'options': '-c search_path=django,public,kbo,ingestion'
         },
         'NAME': os.environ['POSTGRES_DB'],
         'USER': os.environ['POSTGRES_USER'],
