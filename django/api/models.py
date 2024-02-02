@@ -1,5 +1,26 @@
 from django.contrib.gis.db import models
 
+class InputSourceUpdate(models.Model):
+    class Status(models.TextChoices):
+        SUCCESS = 'success', 'Success'
+        FAIL = 'fail', 'Fail'
+        IN_PROGRESS = 'in_progress', 'In progress'
+
+    status = models.CharField(
+        max_length=12,
+        choices=Status.choices,
+        default=Status.IN_PROGRESS
+    )
+
+    start_time = models.DateTimeField(auto_now_add=True)
+    end_time = models.DateTimeField(null=True)
+    message = models.CharField(max_length=255, null=True)
+    source = models.ForeignKey(
+        'InputSource',
+        on_delete=models.CASCADE,
+        null=True
+    )
+
 class InputSource(models.Model):
     class Types(models.TextChoices):
         GEOJSON = 'json', 'Geojson'
