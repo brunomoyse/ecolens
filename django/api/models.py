@@ -36,6 +36,10 @@ class InputSource(models.Model):
     schema = models.CharField(max_length=255)
     table = models.CharField(max_length=255)
 
+    def last_update(self):
+        last_update = self.inputsourceupdate_set.order_by('-start_time').first()
+        return last_update
+
 class Layer(models.Model):
     name = models.CharField(max_length=255)
     url = models.URLField(max_length=255)
