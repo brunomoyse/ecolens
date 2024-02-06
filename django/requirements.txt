@@ -9,3 +9,4 @@ redis==5.0.1
 celery==5.3.6
 GeoAlchemy2==0.14.3
 geopandas==0.14.2
+django-cors-headers==4.3.1
