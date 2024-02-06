@@ -8,7 +8,7 @@ interface BottomButtonsProps {
 
 export default function BarButtons({ onToggleLeftPanel, onToggleBottomPanel, isButtonsBarUp }: BottomButtonsProps) {
     return (
-        <div className={`absolute left-1/2 z-10 -translate-x-1/2 buttons-bar ${isButtonsBarUp ? 'bottom-72' : 'bottom-14'}`}>
+        <div className={`absolute left-1/2 z-10 -translate-x-1/2 buttons-bar ${isButtonsBarUp ? 'bottom-[420px]' : 'bottom-14'}`}>
             <Button onClick={onToggleLeftPanel} variant="outline" size="icon" className="h-12 w-12 rounded-full border-2 border-red-600 mr-4">
                 <Layers className="h-6 w-6" />
             </Button>

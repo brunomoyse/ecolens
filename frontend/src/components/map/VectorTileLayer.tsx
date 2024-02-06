@@ -15,7 +15,6 @@ const createVectorTileLayer = (
     minZoom: number = 6,
 ) => {
     const layer = new VectorTileLayer({
-        declutter: true,
         source: new VectorTileSource({
             format: new MVT(),
             url: url

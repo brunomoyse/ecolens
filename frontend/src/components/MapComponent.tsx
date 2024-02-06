@@ -11,7 +11,7 @@ import { useMap } from "@/context/map-context";
 
 import { createVectorTileLayer, defaultPolygonStyle, defaultPointStyle } from './map/VectorTileLayer';
 import { createGeoJsonLayer } from "./map/GeoJsonLayer";
-import DialogMap from "@/components/cards/PreviewCard";
+import PreviewCard from "@/components/cards/PreviewCard";
 import {enterpriseDetails} from "@/types";
 
 // Namur's geographic coordinates (WGS84)
@@ -94,7 +94,7 @@ export default function MapComponent() {
 
     return (
         <div id="map" className="map-container min-h-max w-full">
-            {map && previewCardInfo && <DialogMap data={previewCardInfo} coordinate={previewCardCoordinate}/>}
+            {map && previewCardInfo && previewCardCoordinate && <PreviewCard data={previewCardInfo} coordinate={previewCardCoordinate}/>}
         </div>);
 
 }

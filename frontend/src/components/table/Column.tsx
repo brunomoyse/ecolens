@@ -12,8 +12,17 @@ export type EnterpriseTest = {
 
 export const columns: ColumnDef<EnterpriseTest>[] = [
     {
-        accessorKey: "name",
+        //accessorKey: "name",
+        accessorKey: "nomDuSiegeDExploitation",
         header: "Nom",
+    },
+    {
+        accessorKey: "enterprise_number",
+        header: "N° d'entreprise",
+    },
+    {
+        accessorKey: "establishment_number",
+        header: "Unité d'établissement",
     },
     {
         accessorKey: "type",
