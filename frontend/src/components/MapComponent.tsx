@@ -90,10 +90,10 @@ export default function MapComponent() {
             setPreviewCardInfo(null);
             setPreviewCardCoordinate(undefined);
         });
-    }, [map]);
+    }, [map]); // eslint-disable-line
 
     return (
-        <div id="map" className="map-container min-h-max w-full">
+        <div id="map" className="h-screen w-screen">
             {map && previewCardInfo && previewCardCoordinate && <PreviewCard data={previewCardInfo} coordinate={previewCardCoordinate}/>}
         </div>);
 

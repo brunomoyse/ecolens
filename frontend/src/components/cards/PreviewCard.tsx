@@ -20,8 +20,6 @@ interface PreviewCardMapProps {
 }
 
 const PreviewCardMap: React.FC<PreviewCardMapProps> = ({ data, coordinate }) => {
-    console.log('IN COMPONENT', data);
-
     if (!data || !coordinate) return null;
 
     // Inline style for positioning

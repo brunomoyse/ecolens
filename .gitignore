@@ -2,3 +2,5 @@
 .idea
 ecolens_frontend_prod.tar
 ecolens_django.tar
+
+.DS_Store
