@@ -1,8 +1,12 @@
+import { useEffect } from 'react';
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
+
 import TileLayer from 'ol/layer/Tile';
 import { TileArcGISRest } from 'ol/source';
-import { useEffect } from 'react';
+import VectorLayer from 'ol/layer/Vector';
+import VectorSource from 'ol/source/Vector';
+import { Fill, Stroke, Style } from 'ol/style';
 
 type UseDraggableProps = {
   elementId: string;
@@ -13,6 +17,21 @@ const createTileLayerFromUrl = (url: string) => {
     source: new TileArcGISRest({
       url: url
     })
+  });
+}
+
+const createEmptyVectorLayerForDrawing = (vectorSource: VectorSource): VectorLayer<any> => {
+  return new VectorLayer({
+    source: vectorSource,
+    style: new Style({
+      fill: new Fill({
+        color: 'rgba(0, 0, 255, 0.05)',
+      }),
+      stroke: new Stroke({
+        color: 'rgba(0, 0, 255, 1)',
+        width: 2,
+      }),
+    }),
   });
 }
 
@@ -92,4 +111,4 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export {createTileLayerFromUrl, useDraggable};
+export {createTileLayerFromUrl, createEmptyVectorLayerForDrawing, useDraggable};

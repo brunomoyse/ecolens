@@ -9,7 +9,7 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 
-import {createTileLayerFromUrl} from "@/lib/utils"
+import {createTileLayerFromUrl, useDraggable} from "@/lib/utils"
 
 import {geoPortalService, legendArcGis} from "@/types"
 import BaseLayer from "ol/layer/Base";
@@ -38,6 +38,7 @@ const getSubCategories = async (selectedCategory: string): Promise<geoPortalServ
 
 export default function LayerWidget() {
     const { map, layers, addLayer, toggleLayerVisibility } = useMap();
+    useDraggable('layer-widget', 'drag-layer-widget');
 
     const [categories, setCategories] = useState<string[]>([]);
     const [selectedCategory, setSelectedCategory] = useState<string|null>(null);
