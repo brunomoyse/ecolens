@@ -12,10 +12,11 @@ import {getPaeFeatureStyle} from "@/components/map/styles/PaeFeatureStyle";
 const createVectorTileLayer = (
     url: string,
     title: string,
-    style: Style,
-    minZoom: number = 6,
+    form: string,
+    customStyle?: Style,
+    minZoom?: number,
 ) => {
-    const getStyle = title === 'PRE' ? getPaeFeatureStyle : style;
+    const getStyle = title === 'PRE' ? getPaeFeatureStyle : customStyle ? customStyle : form === 'Polygon' ? defaultPolygonStyle : defaultPointStyle;
 
     const layer = new VectorTileLayer({
         source: new VectorTileSource({

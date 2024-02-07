@@ -48,14 +48,15 @@ export default function MapComponent() {
     const preLayer = createVectorTileLayer(
         `${process.env.NEXT_PUBLIC_MAP_SERVER_ENDPOINT!}/geoportail_amenagement_territoire_pre/{z}/{x}/{y}`,
         'PRE',
-        defaultPolygonStyle
+        'Polygon'
     )
 
     const enterpriseLayer = createVectorTileLayer(
         //`${process.env.NEXT_PUBLIC_MAP_SERVER_ENDPOINT!}/function_zxy_kbo_hainaut_establishment/{z}/{x}/{y}?type_of_enterprise=Personne%20morale`,
         `${process.env.NEXT_PUBLIC_MAP_SERVER_ENDPOINT!}hainaut_establishment_view/{z}/{x}/{y}`,
         'Entreprises',
-        defaultPointStyle,
+        'Point',
+        undefined,
         14
     )
 
