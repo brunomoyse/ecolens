@@ -17,6 +17,8 @@ import {Draw} from "ol/interaction";
 import VectorSource from "ol/source/Vector";
 import GeoJSON from 'ol/format/GeoJSON';
 import {Geometry} from "ol/geom";
+import {useAppDispatch, useAppSelector} from "@/store/hooks";
+import {toggleDrawing, toggleDrawn} from "@/store/slices/drawingSlice";
 
 // Namur's geographic coordinates (WGS84)
 const namurGeoCoords = [4.8717, 50.4670];
@@ -32,8 +34,11 @@ const osmLayer = new TileLayer({
     className: 'osm-layer' // Custom class name
 });
 
-export default function MapComponent({ isDrawing = false }: { isDrawing: boolean }) {
+export default function MapComponent() {
     const { map, addLayer } = useMap();
+    const isDrawing = useAppSelector((state) => state.drawing.isDrawing);
+    const dispatch = useAppDispatch();
+
     const [selectedPre, setSelectedPre] = useState< { [x: string]: any; }|null>(null);
     const [selectedEnterprise, setSelectedEnterprise] = useState< { [x: string]: any; }|null>(null);
 
@@ -144,16 +149,27 @@ export default function MapComponent({ isDrawing = false }: { isDrawing: boolean
                     const geoJson = format.writeGeometry(drawGeometry);
 
                     console.log(geoJson);
+
                 }
 
                 // Remove the draw interaction from the map after drawing is complete
                 map.removeInteraction(draw);
+
+                // Toggle store drawing state
+                dispatch(toggleDrawing());
+                dispatch(toggleDrawn())
             });
         }
     };
 
     if (map && isDrawing) {
         addDrawingInteraction();
+    } else {
+        map?.getInteractions().forEach((interaction) => {
+            if (interaction instanceof Draw) {
+                map.removeInteraction(interaction);
+            }
+        });
     }
 
     return (

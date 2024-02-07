@@ -84,10 +84,6 @@
   transform: translateY(200%);
 }
 
-.buttons-bar {
-  transition: 0.8s ease-in-out;
-}
-
 .bottom-panel.visible {
   transform: translateY(0);
 }
