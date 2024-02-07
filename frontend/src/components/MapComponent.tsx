@@ -20,9 +20,10 @@ import {Geometry} from "ol/geom";
 import {useAppDispatch, useAppSelector} from "@/store/hooks";
 import {toggleDrawing, toggleDrawn} from "@/store/slices/drawingSlice";
 import {TileArcGISRest} from "ol/source";
-import Style from "ol/style/Style";
+import {Style, Text} from "ol/style";
 import Fill from "ol/style/Fill";
 import Stroke from "ol/style/Stroke";
+import {Feature, } from "ol";
 
 // Namur's geographic coordinates (WGS84)
 const namurGeoCoords = [4.8717, 50.4670];
@@ -49,6 +50,8 @@ export default function MapComponent() {
     const [previewCardInfo, setPreviewCardInfo] = useState<enterpriseDetails|null>(null);
     const [previewCardCoordinate, setPreviewCardCoordinate] = useState<[number, number] | undefined>(undefined);
 
+
+
     const preLayer = createVectorTileLayer(
         `${process.env.NEXT_PUBLIC_MAP_SERVER_ENDPOINT!}/geoportail_amenagement_territoire_pre/{z}/{x}/{y}`,
         'PRE',
@@ -62,7 +65,6 @@ export default function MapComponent() {
         'Entreprises',
         'Point',
         4,
-        undefined,
         14
     )
 
@@ -72,7 +74,6 @@ export default function MapComponent() {
         'Parcelles cadastrales',
         'Polygon',
         2,
-        undefined,
         15
     )
 
