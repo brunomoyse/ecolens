@@ -34,7 +34,7 @@ def clean_string(input_str):
     clean_str = re.sub(r'[ -]', '_', clean_str)
     return clean_str.lower()
 
-### EXTRACT AND REPACKAGE SHAPRFILES FILES ###
+### EXTRACT AND REPACKAGE SHAPEFILES ###
 
 # Loop through all .zip files in the directory
 for filename in os.listdir(directory):
