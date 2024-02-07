@@ -20,6 +20,9 @@ import {Geometry} from "ol/geom";
 import {useAppDispatch, useAppSelector} from "@/store/hooks";
 import {toggleDrawing, toggleDrawn} from "@/store/slices/drawingSlice";
 import {TileArcGISRest} from "ol/source";
+import Style from "ol/style/Style";
+import Fill from "ol/style/Fill";
+import Stroke from "ol/style/Stroke";
 
 // Namur's geographic coordinates (WGS84)
 const namurGeoCoords = [4.8717, 50.4670];
@@ -49,7 +52,8 @@ export default function MapComponent() {
     const preLayer = createVectorTileLayer(
         `${process.env.NEXT_PUBLIC_MAP_SERVER_ENDPOINT!}/geoportail_amenagement_territoire_pre/{z}/{x}/{y}`,
         'PRE',
-        'Polygon'
+        'Polygon',
+        1
     )
 
     const enterpriseLayer = createVectorTileLayer(
@@ -57,25 +61,38 @@ export default function MapComponent() {
         `${process.env.NEXT_PUBLIC_MAP_SERVER_ENDPOINT!}hainaut_establishment_view/{z}/{x}/{y}`,
         'Entreprises',
         'Point',
+        4,
         undefined,
         14
     )
 
-    const relayBuildings = new TileLayer({
+    const plotLayer = createVectorTileLayer(
+        //`${process.env.NEXT_PUBLIC_MAP_SERVER_ENDPOINT!}/function_zxy_kbo_hainaut_establishment/{z}/{x}/{y}?type_of_enterprise=Personne%20morale`,
+        `${process.env.NEXT_PUBLIC_MAP_SERVER_ENDPOINT!}wallonia/{z}/{x}/{y}`,
+        'Parcelles cadastrales',
+        'Polygon',
+        2,
+        undefined,
+        15
+    )
+
+    const relayBuildingsLayer = new TileLayer({
         source: new TileArcGISRest({
             url: 'https://geoservices.wallonie.be/arcgis/rest/services/INDUSTRIES_SERVICES/HALL_RELAIS/MapServer',
             params: {
                 LAYERS: 'show:0',
                 minZoom: 22,
+                zIndex: 5,
             },
         }),
     });
-    relayBuildings.set('title', 'Bâtiments relais');
-    relayBuildings.setVisible(false);
+    relayBuildingsLayer.set('title', 'Bâtiments relais');
+    relayBuildingsLayer.setVisible(false);
 
     const intercomLimitsLayer = createGeoJsonLayer(
         'geojsons/limite-intercommunales.geojson',
         'Délimitation intercommunales',
+        3
     );
 
     useEffect(() => {
@@ -86,10 +103,11 @@ export default function MapComponent() {
         map.setLayers([osmLayer]);
 
         // Add base layers using addLayer from context
-        addLayer(intercomLimitsLayer);
-        addLayer(preLayer);
         addLayer(enterpriseLayer);
-        addLayer(relayBuildings);
+        addLayer(relayBuildingsLayer);
+        addLayer(preLayer);
+        addLayer(intercomLimitsLayer);
+        addLayer(plotLayer);
 
         // Click interaction
         map.on('click', function (evt) {

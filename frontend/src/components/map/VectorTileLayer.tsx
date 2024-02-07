@@ -13,6 +13,7 @@ const createVectorTileLayer = (
     url: string,
     title: string,
     form: string,
+    zIndex: number,
     customStyle?: Style,
     minZoom?: number,
 ) => {
@@ -23,8 +24,9 @@ const createVectorTileLayer = (
             format: new MVT(),
             url: url
         }),
+        zIndex: zIndex,
         minZoom: minZoom,
-        style: getStyle
+        style: getStyle,
     });
 
     layer.set('title', title);
@@ -34,12 +36,9 @@ const createVectorTileLayer = (
 
 // Default styles
 const defaultPolygonStyle = new Style({
-    fill: new Fill({
-        color: 'rgba(211, 255, 190, 0.2)'
-    }),
     stroke: new Stroke({
-        color: 'rgba(168, 111, 0, 1)',
-        width: 2
+        color: 'rgba(0, 0, 0, 0.6)',
+        width: 1
     })
 });
 
@@ -47,7 +46,7 @@ const defaultPointStyle = new Style({
     image: new Circle({
         radius: 5,
         fill: new Fill({
-            color: 'rgba(255, 0, 0, 0.5)' // Red fill color for points
+            color: 'rgba(255, 0, 0, 0.8)' // Red fill color for points
         }),
         stroke: new Stroke({
             color: '#ff0000', // Red stroke color
