@@ -1,3 +1,5 @@
+import {Geometry} from "ol/geom";
+
 interface geoPortalService {
     name: string,
     type: string
@@ -26,6 +28,7 @@ interface legendArcGisLayerLegend {
     values: string[]
 }
 
+// To replace with Enterprise
 interface enterpriseDetails {
     box: string|null,
     denomination: string,
@@ -42,4 +45,60 @@ interface enterpriseDetails {
     type_of_enterprise: string|null,
 }
 
-export type { legendArcGis, geoPortalService, enterpriseDetails };
+interface Enterprise {
+    id: string,
+    establishment_number: string,
+    enterprise_number: string,
+    name: string,
+    name_commercial: string,
+    name_short: string,
+    form: string,
+    start_date: string,
+    nace_main: string,
+    nace_other: string[],
+    sector: string,
+    address_extra: string,
+    address_id: string,
+    address: Address
+    eap_id: string,
+    eap: EconomicalActivityPark
+}
+
+interface Address {
+    id: string,
+    street_name: string,
+    street_number: string,
+    postal_code: string,
+    municipality: string,
+    district: string,
+    province: string,
+    region: string,
+    geometry: Geometry
+}
+
+interface EconomicalActivityPark {
+    id: string,
+    name: string,
+    document_url: string,
+    area: string,
+    allocation: string,
+    geometry: Geometry,
+    ie_id: string
+    intercommunal_enterprise: IntercommunalEnterprise
+}
+
+interface IntercommunalEnterprise {
+    id: string,
+    name: string,
+    geometry: Geometry
+}
+
+export type {
+    legendArcGis,
+    geoPortalService,
+    enterpriseDetails,
+    Enterprise,
+    Address,
+    EconomicalActivityPark,
+    IntercommunalEnterprise
+};

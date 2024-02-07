@@ -19,6 +19,7 @@ import GeoJSON from 'ol/format/GeoJSON';
 import {Geometry} from "ol/geom";
 import {useAppDispatch, useAppSelector} from "@/store/hooks";
 import {toggleDrawing, toggleDrawn} from "@/store/slices/drawingSlice";
+import {TileArcGISRest} from "ol/source";
 
 // Namur's geographic coordinates (WGS84)
 const namurGeoCoords = [4.8717, 50.4670];
@@ -60,6 +61,18 @@ export default function MapComponent() {
         14
     )
 
+    const relayBuildings = new TileLayer({
+        source: new TileArcGISRest({
+            url: 'https://geoservices.wallonie.be/arcgis/rest/services/INDUSTRIES_SERVICES/HALL_RELAIS/MapServer',
+            params: {
+                LAYERS: 'show:0',
+                minZoom: 22,
+            },
+        }),
+    });
+    relayBuildings.set('title', 'Bâtiments relais');
+    relayBuildings.setVisible(false);
+
     const intercomLimitsLayer = createGeoJsonLayer(
         'geojsons/limite-intercommunales.geojson',
         'Délimitation intercommunales',
@@ -76,6 +89,7 @@ export default function MapComponent() {
         addLayer(intercomLimitsLayer);
         addLayer(preLayer);
         addLayer(enterpriseLayer);
+        addLayer(relayBuildings);
 
         // Click interaction
         map.on('click', function (evt) {
@@ -150,7 +164,6 @@ export default function MapComponent() {
                     const geoJson = format.writeGeometry(drawGeometry);
 
                     console.log(geoJson);
-
                 }
 
                 // Remove the draw interaction from the map after drawing is complete

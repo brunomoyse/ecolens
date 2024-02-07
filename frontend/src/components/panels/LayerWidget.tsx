@@ -45,8 +45,6 @@ export default function LayerWidget() {
     const [subCategories, setSubCategories] = useState<geoPortalService[]>([]);
     const [selectedSubCategory, setSelectedSubCategory] = useState<string|null>(null);
 
-    const [layersList, setLayersList] = useState<BaseLayer[]>([])
-
     const [isVisible, setIsVisible] = useState(true);
 
     useEffect(() => {
