@@ -6,6 +6,7 @@ import Style from "ol/style/Style";
 import Fill from "ol/style/Fill";
 import Stroke from "ol/style/Stroke";
 import Circle from "ol/style/Circle";
+import {getPaeFeatureStyle} from "@/components/map/styles/PaeFeatureStyle";
 
 // Function to create a Vector Tile Layer
 const createVectorTileLayer = (
@@ -14,13 +15,15 @@ const createVectorTileLayer = (
     style: Style,
     minZoom: number = 6,
 ) => {
+    const getStyle = title === 'PRE' ? getPaeFeatureStyle : style;
+
     const layer = new VectorTileLayer({
         source: new VectorTileSource({
             format: new MVT(),
             url: url
         }),
         minZoom: minZoom,
-        style: style
+        style: getStyle
     });
 
     layer.set('title', title);
