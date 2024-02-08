@@ -20,10 +20,8 @@ import {Geometry} from "ol/geom";
 import {useAppDispatch, useAppSelector} from "@/store/hooks";
 import {toggleDrawing, toggleDrawn} from "@/store/slices/drawingSlice";
 import {TileArcGISRest} from "ol/source";
-import {Style, Text} from "ol/style";
-import Fill from "ol/style/Fill";
-import Stroke from "ol/style/Stroke";
-import {Feature, } from "ol";
+import {setSelectedEnterprise} from "@/store/slices/enterpriseSlice";
+import {setSelectedEap} from "@/store/slices/eapSlice";
 
 // Namur's geographic coordinates (WGS84)
 const namurGeoCoords = [4.8717, 50.4670];
@@ -44,8 +42,8 @@ export default function MapComponent() {
     const isDrawing = useAppSelector((state) => state.drawing.isDrawing);
     const dispatch = useAppDispatch();
 
-    const [selectedPre, setSelectedPre] = useState< { [x: string]: any; }|null>(null);
-    const [selectedEnterprise, setSelectedEnterprise] = useState< { [x: string]: any; }|null>(null);
+    //const [selectedPre, setSelectedPre] = useState< { [x: string]: any; }|null>(null);
+    //const [selectedEnterprise, setSelectedEnterprise] = useState< { [x: string]: any; }|null>(null);
 
     const [previewCardInfo, setPreviewCardInfo] = useState<enterpriseDetails|null>(null);
     const [previewCardCoordinate, setPreviewCardCoordinate] = useState<[number, number] | undefined>(undefined);
@@ -114,10 +112,9 @@ export default function MapComponent() {
         map.on('click', function (evt) {
             map.forEachFeatureAtPixel(evt.pixel, (feature, layer) => {
                 if (layer === preLayer) {
-                    setSelectedPre(feature.getProperties());
+                    dispatch(setSelectedEap(feature.getProperties()));
                 } else if (layer === enterpriseLayer) {
-                    setSelectedEnterprise(feature.getProperties());
-                    setPreviewCardInfo(feature.getProperties() as enterpriseDetails);
+                    dispatch(setSelectedEnterprise(feature.getProperties()));
                     const pixel = map.getPixelFromCoordinate(evt.coordinate);
                     if (pixel) {
                         setPreviewCardCoordinate([pixel[0], pixel[1]]);

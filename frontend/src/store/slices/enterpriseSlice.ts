@@ -60,7 +60,6 @@ export const enterpriseSlice = createSlice({
         builder.addCase(fetchEnterprises.fulfilled, (state, action) => {
             state.enterprises = action.payload;
         });
-        // Handle other states like pending or rejected if necessary
     },
 });
 

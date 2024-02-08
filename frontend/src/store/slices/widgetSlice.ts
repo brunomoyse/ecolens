@@ -7,8 +7,6 @@ interface WidgetState {
 }
 
 const initialState: WidgetState = {
-    enterpriseListPanelObject: null,
-    enterpriseListPanel: false,
     selectedEnterpriseWidget: false,
     layerWidget: true,
     legendWidget: true,
@@ -18,9 +16,6 @@ export const widgetSlice = createSlice({
     name: 'widget',
     initialState,
     reducers: {
-        toggleSelectedEnterpriseWidget: (state) => {
-            state.selectedEnterpriseWidget = !state.selectedEnterpriseWidget;
-        },
         toggleLayerWidget: (state) => {
             state.layerWidget = !state.layerWidget;
         },
@@ -31,7 +26,6 @@ export const widgetSlice = createSlice({
 });
 
 export const {
-    toggleSelectedEnterpriseWidget,
     toggleLayerWidget,
     toggleLegendWidget
 } = widgetSlice.actions;
