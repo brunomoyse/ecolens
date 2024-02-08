@@ -1,27 +1,28 @@
 import { createSlice } from '@reduxjs/toolkit';
+import {Polygon} from "ol/geom";
 
 interface DrawingState {
     isDrawing: boolean;
-    isDrawn: boolean;
+    drawnFeature: Polygon | null;
 }
 
 const initialState: DrawingState = {
     isDrawing: false,
-    isDrawn: false,
+    drawnFeature: null
 };
 
 export const drawingSlice = createSlice({
     name: 'drawing',
     initialState,
     reducers: {
-        toggleDrawing: (state) => {
-            state.isDrawing = !state.isDrawing;
+        setDrawingState: (state, action) => {
+            state.isDrawing = action.payload;
         },
-        toggleDrawn: (state) => {
-            state.isDrawn = !state.isDrawn;
-        },
+        setDrawnFeature: (state, action) => {
+            state.drawnFeature = action.payload;
+        }
     },
 });
 
-export const { toggleDrawing, toggleDrawn } = drawingSlice.actions;
+export const { setDrawingState, setDrawnFeature } = drawingSlice.actions;
 export default drawingSlice.reducer;

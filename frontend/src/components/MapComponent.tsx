@@ -6,7 +6,7 @@ import View from 'ol/View.js';
 import OSM from 'ol/source/OSM.js';
 import TileLayer from 'ol/layer/Tile.js';
 import { useEffect, useState } from 'react';
-import { fromLonLat } from 'ol/proj';
+import {fromLonLat, transformExtent} from 'ol/proj';
 import { useMap } from "@/context/map-context";
 import { createEmptyVectorLayerForDrawing } from "@/lib/utils";
 import { createVectorTileLayer, defaultPolygonStyle, defaultPointStyle } from './map/VectorTileLayer';
@@ -18,9 +18,9 @@ import VectorSource from "ol/source/Vector";
 import GeoJSON from 'ol/format/GeoJSON';
 import {Geometry} from "ol/geom";
 import {useAppDispatch, useAppSelector} from "@/store/hooks";
-import {toggleDrawing, toggleDrawn} from "@/store/slices/drawingSlice";
+import {setDrawnFeature} from "@/store/slices/drawingSlice";
 import {TileArcGISRest} from "ol/source";
-import {setSelectedEnterprises} from "@/store/slices/enterpriseSlice";
+import {fetchEnterprises, setSelectedEnterprises} from "@/store/slices/enterpriseSlice";
 import {setSelectedEap} from "@/store/slices/eapSlice";
 import {Overlay} from "ol";
 
@@ -41,6 +41,7 @@ const osmLayer = new TileLayer({
 export default function MapComponent() {
     const { map, addLayer } = useMap();
     const isDrawing = useAppSelector((state) => state.drawing.isDrawing);
+    const drawnFeature = useAppSelector((state) => state.drawing.drawnFeature);
     const dispatch = useAppDispatch();
 
     const [previewCardInfo, setPreviewCardInfo] = useState<Enterprise[]|null>(null);
@@ -90,20 +91,38 @@ export default function MapComponent() {
         3
     );
 
-    useEffect(() => {
+    const toggleDrawingInteraction = () => {
         if (!map) return;
+        const drawingInteraction = map.getInteractions().getArray().find(interaction => interaction instanceof Draw);
 
-        map.setTarget('map');
-        map.setView(namurCenteredView);
-        map.setLayers([osmLayer]);
+        if (isDrawing && !drawingInteraction) {
+            // Add drawing interaction
+            const vectorSource = new VectorSource();
+            const vectorLayer = createEmptyVectorLayerForDrawing(vectorSource);
+            vectorLayer.set('title', 'Drawing');
+            map.addLayer(vectorLayer);
 
-        // Add base layers using addLayer from context
-        addLayer(enterpriseLayer);
-        addLayer(relayBuildingsLayer);
-        addLayer(preLayer);
-        addLayer(intercomLimitsLayer);
-        addLayer(plotLayer);
-    }, [map]); // eslint-disable-line
+            const drawInteraction = new Draw({
+                source: vectorSource,
+                type: 'Polygon',
+            });
+            map.addInteraction(drawInteraction);
+            drawInteraction.on('drawend', (event) => {
+                if (event.feature) {
+                    const geoJSON = new GeoJSON();
+                    const drawnFeature = geoJSON.writeFeatureObject(event.feature);
+                    dispatch(setDrawnFeature(drawnFeature));
+
+                    // Remove the draw interaction after drawing is complete
+                    map.removeInteraction(drawInteraction);
+                }
+
+            });
+        } else if (!isDrawing && drawingInteraction) {
+            // Remove drawing interaction
+            map.removeInteraction(drawingInteraction);
+        }
+    };
 
     useEffect(() => {
         if (!map) return;
@@ -132,77 +151,39 @@ export default function MapComponent() {
             // Reset the selected feature when the map is moved
             setPreviewCardCoordinate(undefined);
         });
+    }, [map, isDrawing, drawnFeature]); // eslint-disable-line
+
+
+    useEffect(() => {
+        if (!map) return;
+
+        map.setTarget('map');
+        map.setView(namurCenteredView);
+        map.setLayers([osmLayer]);
+
+        // Add base layers using addLayer from context
+        addLayer(enterpriseLayer);
+        addLayer(relayBuildingsLayer);
+        addLayer(preLayer);
+        addLayer(intercomLimitsLayer);
+        addLayer(plotLayer);
     }, [map]); // eslint-disable-line
 
+    useEffect(() => {
+        // This effect could solely be responsible for managing the drawing interaction
+        // based on the `isDrawing` state.
+        if (!map) return;
 
-    const addDrawingInteraction = () => {
-        if (map) {
-            // Remove the draw interaction if it already exists
-            map.getInteractions().forEach((interaction) => {
-                if (interaction instanceof Draw) {
-                    map.removeInteraction(interaction);
-                }
-            });
+        toggleDrawingInteraction();
 
-            // Remove the vector layer if it already exists
-            map.getLayers().forEach((layer) => {
-                if (layer.get('title') === 'Drawing') {
-                    map.removeLayer(layer);
-                }
-            });
-
-            // Create a new vector source for drawing
-            let vectorSource = new VectorSource();
-
-            // Create a vector layer and assign the source to it
-            let vectorLayer = createEmptyVectorLayerForDrawing(vectorSource);
-            vectorLayer.set('title', 'Drawing');
-
-            // Add the vector layer to the map, not the vector source directly
-            map.addLayer(vectorLayer);
-
-            // Initialize the Draw interaction with the vector source
-            const draw = new Draw({
-                source: vectorSource,
-                type: 'Polygon',
-            });
-
-            // Add the draw interaction to the map
-            map.addInteraction(draw);
-
-            // Add a listener for the drawend event to log the feature's geometry and remove the draw interaction
-            draw.on('drawend', (event) => {
-                if (event.feature) {
-                    // Initialize GeoJSON format
-                    const format = new GeoJSON();
-
-                    const drawGeometry = event.feature.getGeometry() as Geometry;
-
-                    // Write the feature's geometry to a GeoJSON string
-                    const geoJson = format.writeGeometry(drawGeometry);
-
-                    console.log(geoJson);
-                }
-
-                // Remove the draw interaction from the map after drawing is complete
-                map.removeInteraction(draw);
-
-                // Toggle store drawing state
-                dispatch(toggleDrawing());
-                dispatch(toggleDrawn())
-            });
-        }
-    };
-
-    if (map && isDrawing) {
-        addDrawingInteraction();
-    } else {
-        map?.getInteractions().forEach((interaction) => {
-            if (interaction instanceof Draw) {
-                map.removeInteraction(interaction);
+        // Cleanup function
+        return () => {
+            const drawingInteraction = map.getInteractions().getArray().find(interaction => interaction instanceof Draw);
+            if (drawingInteraction) {
+                map.removeInteraction(drawingInteraction);
             }
-        });
-    }
+        };
+    }, [map, isDrawing]); // Dependency on `isDrawing` to re-evaluate when it changes
 
     return (
         <div id="map" className="h-screen w-screen">
