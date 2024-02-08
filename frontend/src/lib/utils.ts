@@ -106,6 +106,19 @@ const useDraggable = (elementId: string, dragHandleId: string) => {
   }, [elementId, dragHandleId]);
 };
 
+const debounce = <F extends (...args: any[]) => any>(func: F, wait: number): ((...args: Parameters<F>) => void) => {
+  let timeout: ReturnType<typeof setTimeout> | null = null;
+  return (...args: Parameters<F>) => {
+    const later = () => {
+      timeout = null;
+      func(...args);
+    };
+    if (timeout !== null) {
+      clearTimeout(timeout);
+    }
+    timeout = setTimeout(later, wait);
+  };
+};
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))

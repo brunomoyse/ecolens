@@ -50,18 +50,18 @@ interface Enterprise {
     establishment_number: string,
     enterprise_number: string,
     name: string,
-    name_commercial: string,
-    name_short: string,
-    form: string,
-    start_date: string,
-    nace_main: string,
-    nace_other: string[],
-    sector: string,
-    address_extra: string,
-    address_id: string,
-    address: Address
-    eap_id: string,
-    eap: EconomicalActivityPark
+    name_commercial: string|null,
+    name_short: string|null,
+    form: string|null,
+    start_date: string|null,
+    nace_main: string|null,
+    nace_other: string[]|null,
+    sector: string|null,
+    address_extra: string|null,
+    address_id: string|null,
+    address: Address|null,
+    eap_id: string|null,
+    eap: EconomicalActivityPark|null,
 }
 
 interface Address {

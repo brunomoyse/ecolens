@@ -17,14 +17,18 @@ import {
     ResizablePanelGroup,
 } from "@/components/ui/resizable"
 
-
 import { columns } from "@/components/table/Column";
 import {useAppDispatch, useAppSelector} from "@/store/hooks";
 import {fetchEnterprises} from "@/store/slices/enterpriseSlice";
 import {ImperativePanelHandle} from "react-resizable-panels";
 import {PanelBottomOpen, PanelBottomClose} from "lucide-react";
+import {useMap} from "@/context/map-context";
+import {transformExtent} from "ol/proj";
+import {debounce} from "next/dist/server/utils";
 
 export default function BottomPanel() {
+    const { map } = useMap();
+
     const dispatch = useAppDispatch();
     const enterprises = useAppSelector((state) => state.enterprise.enterprises);
 
@@ -41,8 +45,24 @@ export default function BottomPanel() {
     };
 
     useEffect(() => {
-        dispatch(fetchEnterprises({ first: 5 }));
-    }, [dispatch]);
+        if (!map) return;
+
+        const fetchData = () => {
+            const currentBbox3857 = map.getView().calculateExtent(map.getSize());
+            const bboxWGS84 = transformExtent(currentBbox3857, 'EPSG:3857', 'EPSG:4326');
+            dispatch(fetchEnterprises({ first: 5, bbox: bboxWGS84 }));
+        };
+
+        const debouncedFetchData = debounce(fetchData, 800);
+
+        // Listen for the postrender event
+        map.on('postrender', debouncedFetchData);
+
+        // Cleanup function to remove the event listener
+        return () => {
+            map.un('postrender', debouncedFetchData);
+        };
+    }, [dispatch, map]);
 
     return (
         <ResizablePanelGroup

@@ -12,7 +12,7 @@ import { createEmptyVectorLayerForDrawing } from "@/lib/utils";
 import { createVectorTileLayer, defaultPolygonStyle, defaultPointStyle } from './map/VectorTileLayer';
 import { createGeoJsonLayer } from "./map/GeoJsonLayer";
 import PreviewCard from "@/components/cards/PreviewCard";
-import {enterpriseDetails} from "@/types";
+import {Enterprise, enterpriseDetails} from "@/types";
 import {Draw} from "ol/interaction";
 import VectorSource from "ol/source/Vector";
 import GeoJSON from 'ol/format/GeoJSON';
@@ -20,8 +20,9 @@ import {Geometry} from "ol/geom";
 import {useAppDispatch, useAppSelector} from "@/store/hooks";
 import {toggleDrawing, toggleDrawn} from "@/store/slices/drawingSlice";
 import {TileArcGISRest} from "ol/source";
-import {setSelectedEnterprise} from "@/store/slices/enterpriseSlice";
+import {setSelectedEnterprises} from "@/store/slices/enterpriseSlice";
 import {setSelectedEap} from "@/store/slices/eapSlice";
+import {Overlay} from "ol";
 
 // Namur's geographic coordinates (WGS84)
 const namurGeoCoords = [4.8717, 50.4670];
@@ -42,13 +43,8 @@ export default function MapComponent() {
     const isDrawing = useAppSelector((state) => state.drawing.isDrawing);
     const dispatch = useAppDispatch();
 
-    //const [selectedPre, setSelectedPre] = useState< { [x: string]: any; }|null>(null);
-    //const [selectedEnterprise, setSelectedEnterprise] = useState< { [x: string]: any; }|null>(null);
-
-    const [previewCardInfo, setPreviewCardInfo] = useState<enterpriseDetails|null>(null);
+    const [previewCardInfo, setPreviewCardInfo] = useState<Enterprise[]|null>(null);
     const [previewCardCoordinate, setPreviewCardCoordinate] = useState<[number, number] | undefined>(undefined);
-
-
 
     const preLayer = createVectorTileLayer(
         `${process.env.NEXT_PUBLIC_MAP_SERVER_ENDPOINT!}/geoportail_amenagement_territoire_pre/{z}/{x}/{y}`,
@@ -107,34 +103,40 @@ export default function MapComponent() {
         addLayer(preLayer);
         addLayer(intercomLimitsLayer);
         addLayer(plotLayer);
+    }, [map]); // eslint-disable-line
+
+    useEffect(() => {
+        if (!map) return;
+        if (isDrawing) return;
 
         // Click interaction
         map.on('click', function (evt) {
+            const selectingEnterpriseFeatures: Enterprise[] = [];
+
+            const pixel = map.getPixelFromCoordinate(evt.coordinate);
+            if (pixel) {
+                setPreviewCardCoordinate([pixel[0], pixel[1]]);
+            }
+
             map.forEachFeatureAtPixel(evt.pixel, (feature, layer) => {
                 if (layer === preLayer) {
                     dispatch(setSelectedEap(feature.getProperties()));
                 } else if (layer === enterpriseLayer) {
-                    dispatch(setSelectedEnterprise(feature.getProperties()));
-                    const pixel = map.getPixelFromCoordinate(evt.coordinate);
-                    if (pixel) {
-                        setPreviewCardCoordinate([pixel[0], pixel[1]]);
-                    } else {
-                        setPreviewCardCoordinate(undefined);
-                    }
+                    selectingEnterpriseFeatures.push(feature.getProperties() as Enterprise);
                 }
             });
+            dispatch(setSelectedEnterprises(selectingEnterpriseFeatures));
         });
 
         map.on('movestart', function () {
             // Reset the selected feature when the map is moved
-            setPreviewCardInfo(null);
             setPreviewCardCoordinate(undefined);
         });
     }, [map]); // eslint-disable-line
 
+
     const addDrawingInteraction = () => {
         if (map) {
-
             // Remove the draw interaction if it already exists
             map.getInteractions().forEach((interaction) => {
                 if (interaction instanceof Draw) {
@@ -161,8 +163,8 @@ export default function MapComponent() {
 
             // Initialize the Draw interaction with the vector source
             const draw = new Draw({
-                source: vectorSource, // This should be the vector source
-                type: 'Polygon', // The geometry type to draw
+                source: vectorSource,
+                type: 'Polygon',
             });
 
             // Add the draw interaction to the map
@@ -204,7 +206,7 @@ export default function MapComponent() {
 
     return (
         <div id="map" className="h-screen w-screen">
-            {map && previewCardInfo && previewCardCoordinate && <PreviewCard data={previewCardInfo} coordinate={previewCardCoordinate}/>}
+            {map && previewCardCoordinate && <PreviewCard coordinate={previewCardCoordinate}/>}
         </div>);
 
 }
