@@ -8,8 +8,11 @@ from select_enterprises import select_data
 from dotenv import load_dotenv
 from datetime import datetime
 
-# Load environment variables from .env file
-load_dotenv()
+# Specify the path to your .env file here
+dotenv_path = '../.env'
+
+# Load environment variables from the specified .env file
+load_dotenv(dotenv_path=dotenv_path)
 
 def get_most_recent_data(enterprise_number):
     url = f"https://ws.cbso.nbb.be/authentic/legalEntity/{enterprise_number}/references"
@@ -33,8 +36,6 @@ def get_most_recent_data(enterprise_number):
         # If the data is an object and has a key status equals to 404, return an empty array
         if isinstance(data, dict) and data["status"] == 404:
             return []
-
-        print(data)
 
         # Filter out objects that don't have the "DepositDate" key
         filtered_data = [obj for obj in data if "DepositDate" in obj]
@@ -60,7 +61,7 @@ def get_most_recent_data(enterprise_number):
         else:
             print("Error:", error)
 
-        return accounting_response
+        return json.dumps(accounting_response)
 
     except requests.RequestException as e:
         print(f"Error: {e}")

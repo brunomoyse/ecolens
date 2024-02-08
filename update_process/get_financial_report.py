@@ -1,7 +1,7 @@
-# fill_database.py
 from dotenv import load_dotenv
 import os
 import psycopg2
+import json
 
 # Specify the path to your .env file here
 dotenv_path = '../.env'
@@ -9,7 +9,7 @@ dotenv_path = '../.env'
 # Load environment variables from the specified .env file
 load_dotenv(dotenv_path=dotenv_path)
 
-def fill_financial_reports(enterprise_number, financial_report):
+def get_financial_report(enterprise_number):
     conn = None
     try:
         # Connect to your database
@@ -26,20 +26,34 @@ def fill_financial_reports(enterprise_number, financial_report):
 
         # SQL query to fill the ingestion.financial_reports table
         sql = """
-           INSERT INTO ingestion.financial_reports (enterprise_number, raw_data)
-            VALUES (%s, %s);
+        SELECT raw_data FROM ingestion.financial_reports
+        WHERE enterprise_number = %s
+        LIMIT 1;
         """
 
-        variables = (enterprise_number, financial_report)
+
+        variables = (enterprise_number,)
 
         # Execute the query
         cur.execute(sql, variables)
 
+        # Fetch the record
+        records = cur.fetchone()
+
         # Close communication with the database
         cur.close()
+
+        record = records[0]
+
+        return record
 
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
     finally:
         if conn is not None:
             conn.close()
+
+
+
+
+

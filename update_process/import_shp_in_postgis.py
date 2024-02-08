@@ -17,12 +17,12 @@ zip_directory = os.getenv('PATH_SHP_PLOTS_FILES')
 temp_extract_dir = os.getenv('PATH_TEMP_FILES')
 
 # PostgreSQL connection parameters
-db_host = os.getenv('DB_HOST')
-db_port = os.getenv('DB_PORT')
-database_name = os.getenv('DB_NAME')
-user_name = os.getenv('DB_USER')
-password = os.getenv('DB_PASSWORD')
-schema_name = os.getenv('DB_SCHEMA')
+db_host = os.getenv('POSTGRES_HOST')
+db_port = os.getenv('POSTGRES_PORT')
+database_name = os.getenv('POSTGRES_DB')
+user_name = os.getenv('POSTGRES_USER')
+password = os.getenv('POSTGRES_PASSWORD')
+schema_name = "plots"
 srid = "31370"
 
 # Ensure the temporary directory exists

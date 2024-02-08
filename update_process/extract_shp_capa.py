@@ -4,8 +4,11 @@ import zipfile
 import re
 import unicodedata
 
-# Load environment variables from .env file
-load_dotenv()
+# Specify the path to your .env file here
+dotenv_path = '../.env'
+
+# Load environment variables from the specified .env file
+load_dotenv(dotenv_path=dotenv_path)
 
 # Directory containing the .zip files
 directory = os.getenv('PATH_DOWNLOADED_FILES')

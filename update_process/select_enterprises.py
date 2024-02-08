@@ -3,19 +3,22 @@ from dotenv import load_dotenv
 import os
 import psycopg2
 
-# Load environment variables from .env file
-load_dotenv()
+# Specify the path to your .env file here
+dotenv_path = '../.env'
+
+# Load environment variables from the specified .env file
+load_dotenv(dotenv_path=dotenv_path)
 
 def select_data():
     conn = None
     try:
         # Connect to your database
         conn = psycopg2.connect(
-            host=os.getenv('DB_HOST'),
-            database=os.getenv('DB_NAME'),
-            user=os.getenv('DB_USER'),
-            password=os.getenv('DB_PASSWORD'),
-            port=os.getenv('DB_PORT')
+            host=os.getenv('POSTGRES_HOST'),
+            database=os.getenv('POSTGRES_DB'),
+            user=os.getenv('POSTGRES_USER'),
+            password=os.getenv('POSTGRES_PASSWORD'),
+            port=os.getenv('POSTGRES_PORT')
         )
 
         # Create a cursor object
