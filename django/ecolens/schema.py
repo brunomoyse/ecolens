@@ -11,7 +11,6 @@ class EntreprisesSpwSiegesExportationType(DjangoObjectType):
         fields = (
             "ndeg_du_siege_social",
             "nom_du_siege_social",
-            "nom_du_siege_social",
             "nom_du_siege_d_exploitation")
 
 class LayerType(DjangoObjectType):
