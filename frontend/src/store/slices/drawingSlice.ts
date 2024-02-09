@@ -20,6 +20,7 @@ export const drawingSlice = createSlice({
         },
         setDrawnFeature: (state, action) => {
             state.drawnFeature = action.payload;
+            console.log('drawnFeature', state.drawnFeature);
         }
     },
 });

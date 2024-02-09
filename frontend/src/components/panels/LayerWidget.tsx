@@ -1,6 +1,13 @@
 import {useState, useEffect} from 'react';
 import {useMap} from "@/context/map-context";
-import {Eye, EyeOff, Layers, Minus, Plus} from 'lucide-react';
+import {ChevronDown, ExpandIcon, Eye, EyeOff, Layers, Minus, Plus} from 'lucide-react';
+import {
+    Accordion,
+    AccordionContent,
+    AccordionItem,
+    AccordionTrigger,
+} from "@/components/ui/accordion"
+
 import {
     Select,
     SelectContent,
@@ -12,7 +19,10 @@ import {
 import {createTileLayerFromUrl, useDraggable} from "@/lib/utils"
 
 import {geoPortalService, legendArcGis} from "@/types"
+import Image from "next/image";
 import BaseLayer from "ol/layer/Base";
+import {useAppDispatch, useAppSelector} from "@/store/hooks";
+import {fetchGeoPortalLegend} from "@/store/slices/legendSlice";
 
 const geoPortalBaseUrl: string = 'https://geoservices.wallonie.be/arcgis/rest/services/';
 const getJsonResponse: string = '?f=json';
@@ -39,6 +49,9 @@ const getSubCategories = async (selectedCategory: string): Promise<geoPortalServ
 export default function LayerWidget() {
     const { map, layers, addLayer, toggleLayerVisibility } = useMap();
     useDraggable('layer-widget', 'drag-layer-widget');
+    const dispatch = useAppDispatch();
+
+    const geoPortalLegends = useAppSelector((state) => state.legend.geoPortalLegends);
 
     const [categories, setCategories] = useState<string[]>([]);
     const [selectedCategory, setSelectedCategory] = useState<string|null>(null);
@@ -50,7 +63,6 @@ export default function LayerWidget() {
     useEffect(() => {
         getCategories().then(setCategories)
     }, []);
-
 
     const handleCategoryChange = (category: string) => {
         setSelectedCategory(category);
@@ -64,10 +76,21 @@ export default function LayerWidget() {
         newTileLayer.set('title', subcategory)
         addLayer(newTileLayer);
         setSelectedSubCategory(subcategory);
+        dispatch(
+            fetchGeoPortalLegend({
+                layerName: subcategory,
+                category: selectedCategory,
+                subCategory: subcategory
+            })
+        );
     }
 
     const toggleWidgetVisibility = () => {
         setIsVisible(!isVisible);
+    }
+
+    const findLegend = (layer: BaseLayer) => {
+        return geoPortalLegends.find(legend => legend.layerName === layer.get('title'))?.legendData;
     }
 
     return (
@@ -86,18 +109,50 @@ export default function LayerWidget() {
                 {/* List of layers available to display */}
                 <section>
                     {layers && layers.length > 0 && layers.map((baseLayer) => (
-                        <div key={baseLayer.get('title')} className="space-y-4 my-2">
-                            <div onClick={() => toggleLayerVisibility(baseLayer)}
-                                 className="flex items-center px-1 py-2 hover:bg-gray-300 rounded-lg cursor-pointer">
+                        <div key={baseLayer.get('title')}>
+                            {/* Layer name and actions buttons */}
+                            <div className="flex items-center px-1 py-2 rounded-lg">
+                                {/* Layer name */}
                                 <span className="mr-6">{baseLayer.get('title')}</span>
-                                <button className="ml-auto">
-                                    {/* Toggle Icon */}
-                                    {baseLayer.getVisible() ? <Eye/> : <EyeOff/>}
-                                </button>
+
+                                {/* Buttons */}
+                                <div className="ml-auto">
+                                    <button className="px-2 mx-2">
+                                        <ChevronDown/>
+                                    </button>
+                                    <button onClick={() => toggleLayerVisibility(baseLayer)}>
+                                        {/* Toggle Icon */}
+                                        {baseLayer.getVisible() ? <Eye/> : <EyeOff/>}
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+                            {/* Legend */}
+                            <div className="bg-gray-200">
+                                {baseLayer.getVisible() && findLegend(baseLayer)?.layers[0].legend.map((legendItem) => (
+                                    <div key={legendItem.url} className="flex items-center ml-2 pl-2 border-l-2 border-l-black ">
+                                        <div className="flex flex-col justify-center">
+                                            <Image
+                                                width={20}
+                                                height={20}
+                                                draggable={false}
+                                                src={`data:image/png;base64, ${legendItem.imageData}`}
+                                                alt={legendItem.label ?? ''}
+                                            />
+                                        </div>
+                                        <span
+                                            className="ml-2 text-sm">{legendItem.label}
+                                        </span>
+                                    </div>
+                                ))}
                             </div>
                         </div>
                     ))}
                 </section>
+
+
                 {/* Add a layer*/}
                 <section className="mb-4">
                     {/* GeoPortal categories */}

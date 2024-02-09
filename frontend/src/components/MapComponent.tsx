@@ -16,13 +16,13 @@ import {Enterprise, enterpriseDetails} from "@/types";
 import {Draw} from "ol/interaction";
 import VectorSource from "ol/source/Vector";
 import GeoJSON from 'ol/format/GeoJSON';
-import {Geometry} from "ol/geom";
 import {useAppDispatch, useAppSelector} from "@/store/hooks";
 import {setDrawnFeature} from "@/store/slices/drawingSlice";
 import {TileArcGISRest} from "ol/source";
-import {fetchEnterprises, setSelectedEnterprises} from "@/store/slices/enterpriseSlice";
+import {setSelectedEnterprises} from "@/store/slices/enterpriseSlice";
 import {setSelectedEap} from "@/store/slices/eapSlice";
-import {Overlay} from "ol";
+import {WKT} from "ol/format";
+import {fetchGeoPortalLegend} from "@/store/slices/legendSlice";
 
 // Namur's geographic coordinates (WGS84)
 const namurGeoCoords = [4.8717, 50.4670];
@@ -53,6 +53,24 @@ export default function MapComponent() {
         'Polygon',
         1
     )
+
+    useEffect(() => {
+        dispatch(
+            fetchGeoPortalLegend({
+                layerName: 'PRE',
+                category: 'AMENAGEMENT_TERRITOIRE',
+                subCategory: 'PRE'
+            })
+        );
+
+        dispatch(
+            fetchGeoPortalLegend({
+                layerName: 'Bâtiments relais',
+                category: 'INDUSTRIES_SERVICES',
+                subCategory: 'HALL_RELAIS'
+            })
+        );
+    }, [dispatch]);
 
     const enterpriseLayer = createVectorTileLayer(
         //`${process.env.NEXT_PUBLIC_MAP_SERVER_ENDPOINT!}/function_zxy_kbo_hainaut_establishment/{z}/{x}/{y}?type_of_enterprise=Personne%20morale`,
@@ -109,9 +127,14 @@ export default function MapComponent() {
             map.addInteraction(drawInteraction);
             drawInteraction.on('drawend', (event) => {
                 if (event.feature) {
-                    const geoJSON = new GeoJSON();
-                    const drawnFeature = geoJSON.writeFeatureObject(event.feature);
-                    dispatch(setDrawnFeature(drawnFeature));
+                    // Initialize WKT format
+                    const wktFormat = new WKT();
+
+                    // Write the drawn feature's geometry to a WKT string
+                    const wktString = wktFormat.writeFeature(event.feature);
+
+                    // Dispatch the WKT string or handle it as needed
+                    dispatch(setDrawnFeature(wktString));
 
                     // Remove the draw interaction after drawing is complete
                     map.removeInteraction(drawInteraction);
