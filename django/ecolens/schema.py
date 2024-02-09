@@ -51,11 +51,11 @@ class Query(graphene.ObjectType):
 
         return queryset
 
-    def resolve_all_layers(root, info):
+    def resolve_all_layers(self, info):
         # We can easily optimize query count in the resolve method
         return Layer.objects.all()
 
-    def resolve_layer_by_id(root, info, id):
+    def resolve_layer_by_id(self, info, id):
         try:
             return Layer.objects.get(pk=id)
         except Layer.DoesNotExist:
