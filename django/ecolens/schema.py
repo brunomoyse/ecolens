@@ -26,15 +26,21 @@ class Query(graphene.ObjectType):
         skip=graphene.Int(),
         bbox=graphene.List(graphene.Float),
         polygon=graphene.JSONString(),
+        sector=graphene.String(),  # TODO VOIR SI EXISTE UNE ENUM
     )
 
-    def resolve_enterprises(self, info, first=None, skip=None, bbox=None, polygon=None):
+    def resolve_enterprises(
+        self, info, first=None, skip=None, bbox=None, polygon=None, sector=None
+    ):
         queryset = Enterprises.objects.all()
+
+        if sector:
+            queryset = queryset.filter(sector=sector)
 
         if bbox:
             if len(bbox) != 4:
                 raise ValueError(
-                    "La bbox doit contenir exactement 4 éléments (min_lon, min_lat, max_lon, max_lat)"
+                    "The bbox must contain exactly 4 elements (min_lon, min_lat, max_lon, max_lat)"
                 )
 
             bbox_polygon = Polygon.from_bbox(bbox)
@@ -52,7 +58,7 @@ class Query(graphene.ObjectType):
 
         return queryset
 
-    def resolve_all_layers(self, info):
+    def resolve_all_layers(self, _):
         # We can easily optimize query count in the resolve method
         return Layer.objects.all()
 
