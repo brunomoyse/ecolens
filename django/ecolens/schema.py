@@ -5,18 +5,22 @@ import json
 
 from api.models import Layer, EntreprisesSpwSiegesExportation
 
+
 class EntreprisesSpwSiegesExportationType(DjangoObjectType):
     class Meta:
         model = EntreprisesSpwSiegesExportation
         fields = (
             "ndeg_du_siege_social",
             "nom_du_siege_social",
-            "nom_du_siege_d_exploitation")
+            "nom_du_siege_d_exploitation",
+        )
+
 
 class LayerType(DjangoObjectType):
     class Meta:
         model = Layer
         fields = ("id", "name", "url")
+
 
 class Query(graphene.ObjectType):
     all_layers = graphene.List(LayerType)
@@ -34,7 +38,9 @@ class Query(graphene.ObjectType):
 
         if bbox:
             if len(bbox) != 4:
-                raise ValueError("La bbox doit contenir exactement 4 éléments (min_lon, min_lat, max_lon, max_lat)")
+                raise ValueError(
+                    "La bbox doit contenir exactement 4 éléments (min_lon, min_lat, max_lon, max_lat)"
+                )
 
             bbox_polygon = Polygon.from_bbox(bbox)
             queryset = queryset.filter(geometry__within=bbox_polygon)
@@ -60,5 +66,6 @@ class Query(graphene.ObjectType):
             return Layer.objects.get(pk=id)
         except Layer.DoesNotExist:
             return None
+
 
 schema = graphene.Schema(query=Query)
