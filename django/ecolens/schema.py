@@ -11,7 +11,6 @@ class EntreprisesSpwSiegesExportationType(DjangoObjectType):
         fields = (
             "ndeg_du_siege_social",
             "nom_du_siege_social",
-            "nom_du_siege_social",
             "nom_du_siege_d_exploitation")
 
 class LayerType(DjangoObjectType):
@@ -42,7 +41,7 @@ class Query(graphene.ObjectType):
 
         elif polygon:
             geom_geojson = GEOSGeometry(json.dumps(polygon))
-            queryset = queryset.filter(geometry__within=geometry)
+            queryset = queryset.filter(geometry__within=geom_geojson)
 
         if skip:
             queryset = queryset[skip:]

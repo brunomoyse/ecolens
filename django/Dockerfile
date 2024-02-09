@@ -8,6 +8,7 @@ RUN apt-get update \
         libgdal-dev \
         gcc \
         g++ \
+        curl \
     && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
     && rm -rf /var/lib/apt/lists/*
 

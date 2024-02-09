@@ -95,6 +95,7 @@ DATABASES = {
     }
 }
 
+NBB_CBSO_SUBSCRIPTION_KEY = os.getenv("NBB_CBSO_SUBSCRIPTION_KEY")
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators

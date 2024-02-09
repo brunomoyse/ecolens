@@ -6,6 +6,8 @@ handle_path /admin* {
 }
 
 # Redirection vers le port 3000 pour tous les autres chemins
-handle_path / {
+handle {
     reverse_proxy frontend:3000
 }
+
+# log # if you need to display the logs

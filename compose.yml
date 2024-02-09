@@ -46,6 +46,7 @@ services:
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - NBB_CBSO_SUBSCRIPTION_KEY=${NBB_CBSO_SUBSCRIPTION_KEY}
       - DEBUG=1
       #  - ALLOWED_HOST=${SERVER_IP}
     # command: bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
