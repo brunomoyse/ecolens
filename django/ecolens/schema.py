@@ -1,18 +1,14 @@
 import json
 import graphene
 from graphene_django import DjangoObjectType
-from api.models import Layer, EntreprisesSpwSiegesExportation
+from api.models import Layer, Enterprises
 from django.contrib.gis.geos import Polygon, GEOSGeometry
 
 
-class EntreprisesSpwSiegesExportationType(DjangoObjectType):
+class EnterprisesType(DjangoObjectType):
     class Meta:
-        model = EntreprisesSpwSiegesExportation
-        fields = (
-            "ndeg_du_siege_social",
-            "nom_du_siege_social",
-            "nom_du_siege_d_exploitation",
-        )
+        model = Enterprises
+        exclude = ("geom",)
 
 
 class LayerType(DjangoObjectType):
@@ -25,7 +21,7 @@ class Query(graphene.ObjectType):
     all_layers = graphene.List(LayerType)
     layer_by_id = graphene.Field(LayerType, id=graphene.Int(required=True))
     enterprises = graphene.List(
-        EntreprisesSpwSiegesExportationType,
+        EnterprisesType,
         first=graphene.Int(),
         skip=graphene.Int(),
         bbox=graphene.List(graphene.Float),
@@ -33,7 +29,7 @@ class Query(graphene.ObjectType):
     )
 
     def resolve_enterprises(self, info, first=None, skip=None, bbox=None, polygon=None):
-        queryset = EntreprisesSpwSiegesExportation.objects.all()
+        queryset = Enterprises.objects.all()
 
         if bbox:
             if len(bbox) != 4:
