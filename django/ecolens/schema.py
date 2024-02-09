@@ -3,6 +3,8 @@ import graphene
 from graphene_django import DjangoObjectType
 from api.models import Layer, Enterprises
 from django.contrib.gis.geos import Polygon, GEOSGeometry
+from django.db.models import F
+from django.db.models.functions import LTrim
 
 
 class EnterprisesType(DjangoObjectType):
@@ -27,12 +29,25 @@ class Query(graphene.ObjectType):
         bbox=graphene.List(graphene.Float),
         polygon=graphene.JSONString(),
         sector=graphene.String(),  # TODO VOIR SI EXISTE UNE ENUM
+        nace=graphene.String(),
     )
 
     def resolve_enterprises(
-        self, info, first=None, skip=None, bbox=None, polygon=None, sector=None
+        self,
+        info,
+        first=None,
+        skip=None,
+        bbox=None,
+        polygon=None,
+        sector=None,
+        nace=None,
     ):
         queryset = Enterprises.objects.all()
+
+        if nace:
+            queryset = queryset.annotate(trimmed_value=LTrim(F("nace_main"))).filter(
+                trimmed_value__startswith=nace
+            )
 
         if sector:
             queryset = queryset.filter(sector=sector)
