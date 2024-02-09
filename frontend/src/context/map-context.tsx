@@ -39,7 +39,7 @@ export const MapProvider: React.FC<MapProviderProps> = ({ children }) => {
 
     // Functions to add and remove layers
     const addLayer = (layer: BaseLayer) => {
-        if (map) {
+        if (map && !layers.includes(layer)) {
             map.addLayer(layer);
             setLayers(prev => [...prev, layer]);
         }

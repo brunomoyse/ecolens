@@ -5,6 +5,8 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import { MapProvider } from '@/context/map-context';
 import React from "react";
+import { store } from '@/store';
+import {Provider} from "react-redux";
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -19,9 +21,11 @@ export default function RootLayout({ children }: {
     return (
         <html lang="en">
             <body className={inter.className}>
-                <MapProvider>
-                    {children}
-                </MapProvider>
+                <Provider store={store}>
+                    <MapProvider>
+                        {children}
+                    </MapProvider>
+                </Provider>
             </body>
         </html>
     )

@@ -21,9 +21,20 @@ def update_layer(modeladmin, request, queryset):
 
 
 class InputSourceAdmin(admin.ModelAdmin):
-    list_display = ['name', 'type']
+    list_display = ['name', 'type', 'last_update_time', 'last_update_status']
     actions = [update_layer]
 
+    def last_update_time(self, obj):
+        last_update = obj.last_update()
+        if last_update:
+            return last_update.end_time
+        return None
+
+    def last_update_status(self, obj):
+        last_update = obj.last_update()
+        if last_update:
+            return last_update.status
+        return None
 
 admin.site.register(Layer, LayerAdmin)
 admin.site.register(View, ViewAdmin)

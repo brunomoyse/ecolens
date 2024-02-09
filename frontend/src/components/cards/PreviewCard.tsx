@@ -1,61 +1,50 @@
 // Popup.tsx
 import React from 'react';
-import {enterpriseDetails} from "@/types";
 
-import {
-    Card,
-    CardContent,
-    CardFooter,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card"
-
-import { Button } from "@/components/ui/button";
-import {BookOpen} from "lucide-react";
-
+import {useAppDispatch, useAppSelector} from "@/store/hooks";
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Separator } from "@/components/ui/separator"
+import {Enterprise} from "@/types";
+import {setSelectedEnterprise} from "@/store/slices/enterpriseSlice";
+import {setSelectedEnterprises} from "@/store/slices/enterpriseSlice";
 
 interface PreviewCardMapProps {
-    data: enterpriseDetails;
     coordinate: [number, number] | undefined;
 }
 
-const PreviewCardMap: React.FC<PreviewCardMapProps> = ({ data, coordinate }) => {
-    console.log('IN COMPONENT', data);
+const PreviewCardMap: React.FC<PreviewCardMapProps> = ({ coordinate }) => {
+    const dispatch = useAppDispatch();
+    const selectedEnterprises = useAppSelector((state) => state.enterprise.selectedEnterprises);
 
-    if (!data || !coordinate) return null;
+    if (!coordinate || !selectedEnterprises || selectedEnterprises?.length === 0) return null;
 
-    // Inline style for positioning
     const positionStyle = {
         left: `${coordinate[0]}px`,
         top: `${coordinate[1]}px`,
     };
 
+    const handleSelectEnterprise = (enterprise: Enterprise) => {
+        dispatch(setSelectedEnterprise(enterprise));
+        dispatch(setSelectedEnterprises([]));
+    }
+
     return (
-        /*
-        <div style={positionStyle} className="absolute z-10 p-4 bg-white shadow-lg rounded-lg">
-            <h3 className="font-bold text-lg">{data.denomination}</h3>
-            <p className="text-sm">N° entreprise: {data.enterprise_number}</p>
-            <p className="text-sm">Unité d&#39;établissement: {data.establishment_number}</p>
+        <div style={positionStyle} className="absolute z-10 p-1 bg-gray-100">
+            <ScrollArea className={`${selectedEnterprises.length > 4 ? 'h-48' : 'h-auto'} rounded-md border`}>
+                <div className="p-2">
+                    {selectedEnterprises.map((enterprise, index) => (
+                        <>
+                            <div onClick={() => handleSelectEnterprise(enterprise)} key={enterprise.establishment_number} className="flex text-md items-center px-2 py-1 hover:bg-gray-300 rounded-lg cursor-pointer">
+                                {enterprise.denomination}
+                            </div>
+                            {index !== selectedEnterprises.length - 1 && (
+                                <Separator className="my-1" />
+                            )}
+                        </>
+                    ))}
+                </div>
+            </ScrollArea>
         </div>
-
-        */
-        <div style={positionStyle} className="absolute z-10 p-4">
-            <Card>
-                <CardHeader>
-                    <CardTitle>{data.denomination}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <p>N° entreprise: {data.enterprise_number}</p>
-                    <p>Unité d&#39;établissement: {data.establishment_number}</p>
-                </CardContent>
-                <CardFooter>
-                    <Button className="w-full">
-                        <BookOpen className="mr-2 h-4 w-4" /> Détails
-                    </Button>
-                </CardFooter>
-            </Card>
-        </div>
-
     );
 };
 

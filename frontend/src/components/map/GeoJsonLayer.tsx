@@ -10,6 +10,7 @@ import Stroke from 'ol/style/Stroke';
 const createGeoJsonLayer = (
     geoJsonUrl: string,
     title: string,
+    zIndex: number,
     polygonStyle: Style = defaultPolygonStyle,
 ) => {
     const layer = new VectorLayer({
