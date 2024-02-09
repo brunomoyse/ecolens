@@ -1,9 +1,8 @@
+import json
 import graphene
 from graphene_django import DjangoObjectType
-from django.contrib.gis.geos import Polygon, GEOSGeometry
-import json
-
 from api.models import Layer, EntreprisesSpwSiegesExportation
+from django.contrib.gis.geos import Polygon, GEOSGeometry
 
 
 class EntreprisesSpwSiegesExportationType(DjangoObjectType):
