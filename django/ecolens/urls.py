@@ -19,9 +19,10 @@ from django.urls import path
 from graphene_django.views import GraphQLView
 from django.conf import settings
 from django.conf.urls.static import static
+from ecolens.graphqlviews import CSVGraphQLView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path("graphql", GraphQLView.as_view(graphiql=True)),
+    path("graphql", CSVGraphQLView.as_view(graphiql=True)),
 # todo remove static loading in production
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

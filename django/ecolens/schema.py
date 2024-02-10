@@ -31,6 +31,8 @@ class Query(graphene.ObjectType):
         sector=graphene.String(),  # TODO VOIR SI EXISTE UNE ENUM
         nace=graphene.String(),
     )
+    csv = graphene.String()
+
 
     def resolve_enterprises(
         self,
