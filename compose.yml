@@ -24,6 +24,7 @@ services:
       && npm run dev"
   martin:
     image: maplibre/martin
+    command: ["--default-srid=31370"]
     ports:
       - 4000:3000
     environment:

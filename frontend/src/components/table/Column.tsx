@@ -5,20 +5,19 @@ import {Enterprise} from "@/types";
 
 export const columns: ColumnDef<Enterprise>[] = [
     {
-        //accessorKey: "name",
-        accessorKey: "nomDuSiegeDExploitation",
+        accessorKey: "name",
         header: "Nom",
     },
     {
-        accessorKey: "enterprise_number",
+        accessorKey: "enterpriseNumber",
         header: "N° d'entreprise",
     },
     {
-        accessorKey: "establishment_number",
+        accessorKey: "establishmentNumber",
         header: "Unité d'établissement",
     },
     {
-        accessorKey: "type",
+        accessorKey: "form",
         header: "Forme",
     },
 ]

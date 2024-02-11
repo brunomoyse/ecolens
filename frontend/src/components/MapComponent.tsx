@@ -102,49 +102,25 @@ export default function MapComponent() {
     relayBuildingsLayer.set('title', 'Bâtiments relais');
     relayBuildingsLayer.setVisible(false);
 
+    const waterwaysLayer = new TileLayer({
+        source: new TileArcGISRest({
+            url: 'https://geoservices.wallonie.be/arcgis/rest/services/MOBILITE/VOIESNAVIGABLES/MapServer',
+            params: {
+                LAYERS: 'show:0,1,2,3',
+                zIndex: 3,
+            },
+        }),
+    });
+    waterwaysLayer.set('title', 'Voies navigables');
+    waterwaysLayer.setVisible(false);
+
     const intercomLimitsLayer = createGeoJsonLayer(
         'geojsons/limite-intercommunales.geojson',
         'Délimitation intercommunales',
         3
     );
 
-    const toggleDrawingInteraction = () => {
-        if (!map) return;
-        const drawingInteraction = map.getInteractions().getArray().find(interaction => interaction instanceof Draw);
 
-        if (isDrawing && !drawingInteraction) {
-            // Add drawing interaction
-            const vectorSource = new VectorSource();
-            const vectorLayer = createEmptyVectorLayerForDrawing(vectorSource);
-            vectorLayer.set('title', 'Drawing');
-            map.addLayer(vectorLayer);
-
-            const drawInteraction = new Draw({
-                source: vectorSource,
-                type: 'Polygon',
-            });
-            map.addInteraction(drawInteraction);
-            drawInteraction.on('drawend', (event) => {
-                if (event.feature) {
-                    // Initialize WKT format
-                    const wktFormat = new WKT();
-
-                    // Write the drawn feature's geometry to a WKT string
-                    const wktString = wktFormat.writeFeature(event.feature);
-
-                    // Dispatch the WKT string or handle it as needed
-                    dispatch(setDrawnFeature(wktString));
-
-                    // Remove the draw interaction after drawing is complete
-                    map.removeInteraction(drawInteraction);
-                }
-
-            });
-        } else if (!isDrawing && drawingInteraction) {
-            // Remove drawing interaction
-            map.removeInteraction(drawingInteraction);
-        }
-    };
 
     useEffect(() => {
         if (!map) return;
@@ -185,16 +161,64 @@ export default function MapComponent() {
 
         // Add base layers using addLayer from context
         addLayer(enterpriseLayer);
-        addLayer(relayBuildingsLayer);
         addLayer(preLayer);
-        addLayer(intercomLimitsLayer);
         addLayer(plotLayer);
+        addLayer(intercomLimitsLayer);
+        addLayer(relayBuildingsLayer);
+        addLayer(waterwaysLayer)
     }, [map]); // eslint-disable-line
 
     useEffect(() => {
         // This effect could solely be responsible for managing the drawing interaction
         // based on the `isDrawing` state.
         if (!map) return;
+
+        const toggleDrawingInteraction = () => {
+            if (!map) return;
+            const drawingInteraction = map.getInteractions().getArray().find(interaction => interaction instanceof Draw);
+
+            if (isDrawing && !drawingInteraction) {
+                // Add drawing interaction
+                const vectorSource = new VectorSource();
+                const vectorLayer = createEmptyVectorLayerForDrawing(vectorSource);
+                vectorLayer.set('title', 'Drawing');
+                map.addLayer(vectorLayer);
+
+                const drawInteraction = new Draw({
+                    source: vectorSource,
+                    type: 'Polygon',
+                });
+                map.addInteraction(drawInteraction);
+                drawInteraction.on('drawend', (event) => {
+                    if (event.feature) {
+                        // Transform the feature's geometry from EPSG:3857 to EPSG:4326
+                        const featureCopy = event.feature.clone();
+
+                        // Transform the feature's geometry from EPSG:3857 to EPSG:4326
+                        featureCopy.getGeometry()?.transform('EPSG:3857', 'EPSG:4326');
+
+                        // Initialize WKT format
+                        const wktFormat = new WKT();
+
+                        // Write the transformed feature's geometry to a WKT string
+                        const wktString = wktFormat.writeFeature(featureCopy, {
+                            dataProjection: 'EPSG:4326',
+                            featureProjection: 'EPSG:4326'
+                        });
+
+                        // Dispatch the WKT string or handle it as needed
+                        dispatch(setDrawnFeature(wktString));
+
+                        // Remove the draw interaction after drawing is complete
+                        map.removeInteraction(drawInteraction);
+                    }
+
+                });
+            } else if (!isDrawing && drawingInteraction) {
+                // Remove drawing interaction
+                map.removeInteraction(drawingInteraction);
+            }
+        };
 
         toggleDrawingInteraction();
 
@@ -205,7 +229,7 @@ export default function MapComponent() {
                 map.removeInteraction(drawingInteraction);
             }
         };
-    }, [map, isDrawing]); // Dependency on `isDrawing` to re-evaluate when it changes
+    }, [dispatch, isDrawing, map]);
 
     return (
         <div id="map" className="h-screen w-screen">
