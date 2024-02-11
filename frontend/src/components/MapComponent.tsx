@@ -6,23 +6,22 @@ import View from 'ol/View.js';
 import OSM from 'ol/source/OSM.js';
 import TileLayer from 'ol/layer/Tile.js';
 import { useEffect, useState } from 'react';
-import {fromLonLat, transformExtent} from 'ol/proj';
+import { fromLonLat } from 'ol/proj';
 import { useMap } from "@/context/map-context";
 import { createEmptyVectorLayerForDrawing } from "@/lib/utils";
-import { createVectorTileLayer, defaultPolygonStyle, defaultPointStyle } from './map/VectorTileLayer';
+import { createVectorTileLayer } from './map/VectorTileLayer';
 import { createGeoJsonLayer } from "./map/GeoJsonLayer";
 import PreviewCard from "@/components/cards/PreviewCard";
-import {Enterprise, enterpriseDetails} from "@/types";
-import {Draw} from "ol/interaction";
+import { Enterprise } from "@/types";
+import { Draw } from "ol/interaction";
 import VectorSource from "ol/source/Vector";
-import GeoJSON from 'ol/format/GeoJSON';
-import {useAppDispatch, useAppSelector} from "@/store/hooks";
-import {setDrawnFeature} from "@/store/slices/drawingSlice";
-import {TileArcGISRest} from "ol/source";
-import {setSelectedEnterprises} from "@/store/slices/enterpriseSlice";
-import {setSelectedEap} from "@/store/slices/eapSlice";
-import {WKT} from "ol/format";
-import {fetchGeoPortalLegend} from "@/store/slices/legendSlice";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { setDrawnFeature } from "@/store/slices/drawingSlice";
+import { TileArcGISRest } from "ol/source";
+import { setSelectedEnterprises } from "@/store/slices/enterpriseSlice";
+import { setSelectedEap } from "@/store/slices/eapSlice";
+import { WKT } from "ol/format";
+import { fetchGeoPortalLegend } from "@/store/slices/legendSlice";
 
 // Namur's geographic coordinates (WGS84)
 const namurGeoCoords = [4.8717, 50.4670];
@@ -78,16 +77,16 @@ export default function MapComponent() {
         'Entreprises',
         'Point',
         4,
-        14
+        14.5
     )
 
     const plotLayer = createVectorTileLayer(
         //`${process.env.NEXT_PUBLIC_MAP_SERVER_ENDPOINT!}/function_zxy_kbo_hainaut_establishment/{z}/{x}/{y}?type_of_enterprise=Personne%20morale`,
         `${process.env.NEXT_PUBLIC_MAP_SERVER_ENDPOINT!}wallonia/{z}/{x}/{y}`,
-        'Parcelles cadastrales',
+        'Cadastre',
         'Polygon',
         2,
-        15
+        15.5
     )
 
     const relayBuildingsLayer = new TileLayer({

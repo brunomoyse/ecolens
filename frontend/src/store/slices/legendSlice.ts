@@ -51,5 +51,4 @@ export const legendSlice = createSlice({
     },
 });
 
-export const { setEapLegend } = legendSlice.actions;
 export default legendSlice.reducer;

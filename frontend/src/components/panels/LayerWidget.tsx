@@ -1,12 +1,7 @@
 import {useState, useEffect} from 'react';
 import {useMap} from "@/context/map-context";
-import {ChevronDown, ExpandIcon, Eye, EyeOff, Layers, Minus, Plus} from 'lucide-react';
-import {
-    Accordion,
-    AccordionContent,
-    AccordionItem,
-    AccordionTrigger,
-} from "@/components/ui/accordion"
+import { Eye, EyeOff, Layers, Minus, Plus, X } from 'lucide-react';
+
 
 import {
     Select,
@@ -47,7 +42,7 @@ const getSubCategories = async (selectedCategory: string): Promise<geoPortalServ
 }
 
 export default function LayerWidget() {
-    const { map, layers, addLayer, toggleLayerVisibility } = useMap();
+    const { map, layers, addLayer, removeLayer, toggleLayerVisibility } = useMap();
     useDraggable('layer-widget', 'drag-layer-widget');
     const dispatch = useAppDispatch();
 
@@ -74,6 +69,7 @@ export default function LayerWidget() {
         let arcGisUrl = geoPortalBaseUrl + selectedCategory + '/' + subcategory + '/' + 'MapServer'
         const newTileLayer = createTileLayerFromUrl(arcGisUrl);
         newTileLayer.set('title', subcategory)
+        newTileLayer.set('temporary', true)
         addLayer(newTileLayer);
         setSelectedSubCategory(subcategory);
         dispatch(
@@ -111,17 +107,21 @@ export default function LayerWidget() {
                     {layers && layers.length > 0 && layers.map((baseLayer) => (
                         <div key={baseLayer.get('title')}>
                             {/* Layer name and actions buttons */}
-                            <div className="flex items-center px-1 py-2 rounded-lg">
+                            <div className="flex items-center px-1 pt-2 rounded-lg">
                                 {/* Layer name */}
                                 <span className="mr-6">{baseLayer.get('title')}</span>
 
                                 {/* Buttons */}
                                 <div className="ml-auto">
-                                    <button className="px-2 mx-2">
-                                        <ChevronDown/>
-                                    </button>
+
+                                    { baseLayer.get('temporary') && (
+                                        <button className="px-2 mx-2" onClick={() => removeLayer(baseLayer)}>
+                                            <X/>
+                                        </button>
+                                    )}
+
                                     <button onClick={() => toggleLayerVisibility(baseLayer)}>
-                                        {/* Toggle Icon */}
+                                    {/* Toggle Icon */}
                                         {baseLayer.getVisible() ? <Eye/> : <EyeOff/>}
                                     </button>
 
@@ -130,7 +130,8 @@ export default function LayerWidget() {
                             </div>
 
                             {/* Legend */}
-                            <div className="bg-gray-200">
+                            <div className="mb-2">
+                                {/* Arcgis legends */}
                                 {baseLayer.getVisible() && findLegend(baseLayer)?.layers[0].legend.map((legendItem) => (
                                     <div key={legendItem.url} className="flex items-center ml-2 pl-2 border-l-2 border-l-black ">
                                         <div className="flex flex-col justify-center">
@@ -147,6 +148,76 @@ export default function LayerWidget() {
                                         </span>
                                     </div>
                                 ))}
+                                {/* Enterprise legends */}
+                                {baseLayer.get('title') === 'Entreprises' && baseLayer.getVisible() && (
+                                    <>
+                                        {/* Primary sector */}
+                                        <div className="flex items-center ml-2 pl-2 border-l-2 border-l-black ">
+                                            <div className="flex flex-col justify-center">
+                                                <div className="w-5 h-5 flex justify-center items-center">
+                                                    {/* Green point */}
+                                                    <div className="w-2.5 h-2.5 bg-green-500 rounded-full"></div>
+                                                </div>
+                                            </div>
+                                            <span className="ml-2 text-sm">
+                                                Secteur primaire
+                                            </span>
+                                        </div>
+                                        {/* Secondary sector */}
+                                        <div className="flex items-center ml-2 pl-2 border-l-2 border-l-black ">
+                                            <div className="flex flex-col justify-center">
+                                                <div className="w-5 h-5 flex justify-center items-center">
+                                                    {/* Red point */}
+                                                    <div className="w-2.5 h-2.5 bg-red-500 rounded-full"></div>
+                                                </div>
+                                            </div>
+                                            <span className="ml-2 text-sm">
+                                                Secteur secondaire
+                                            </span>
+                                        </div>
+                                        {/* Tertiary sector */}
+                                        <div className="flex items-center ml-2 pl-2 border-l-2 border-l-black ">
+                                            <div className="flex flex-col justify-center">
+                                                <div className="w-5 h-5 flex justify-center items-center">
+                                                    {/* Blue point */}
+                                                    <div className="w-2.5 h-2.5 bg-blue-500 rounded-full"></div>
+                                                </div>
+                                            </div>
+                                            <span className="ml-2 text-sm">
+                                                Secteur tertiaire
+                                            </span>
+                                        </div>
+
+                                    </>
+                                )}
+                                {/* Parcelles cadastrales */}
+                                {baseLayer.get('title') === 'Cadastre' && baseLayer.getVisible() && (
+                                    <>
+                                        <div className="flex items-center ml-2 pl-2 border-l-2 border-l-black ">
+                                            <div className="flex flex-col justify-center">
+                                                <div
+                                                    className="w-5 h-5 bg-transparent ring-2 ring-black ring-inset flex items-center justify-center"/>
+
+                                            </div>
+                                            <span className="ml-2 text-sm">
+                                                Parcelles cadastrales
+                                            </span>
+                                        </div>
+                                    </>
+                                )}
+                                {/* Délimitation intercommunales */}
+                                {baseLayer.get('title') === 'Délimitation intercommunales' && baseLayer.getVisible() && (
+                                    <>
+                                        <div className="flex items-center ml-2 pl-2 border-l-2 border-l-black ">
+                                            <div className="flex flex-col justify-center">
+                                                <div className="w-5 h-5 bg-transparent ring-4 ring-black ring-inset flex items-center justify-center" />
+                                            </div>
+                                            <span className="ml-2 text-sm">
+                                                Parcelles cadastrales
+                                            </span>
+                                        </div>
+                                    </>
+                                )}
                             </div>
                         </div>
                     ))}

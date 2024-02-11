@@ -8,6 +8,7 @@ import Stroke from "ol/style/Stroke";
 import Circle from "ol/style/Circle";
 import {getPaeFeatureStyle} from "@/components/map/styles/PaeFeatureStyle";
 import {getPlotStyle} from "@/components/map/styles/PlotFeatureStyle";
+import {getEnterpriseFeatureStyle} from "@/components/map/styles/EnterpriseFeatureStyle";
 
 // Function to create a Vector Tile Layer
 const createVectorTileLayer = (
@@ -19,6 +20,7 @@ const createVectorTileLayer = (
 ) => {
     const getStyle = title === 'PRE' ? getPaeFeatureStyle :
         title === 'Parcelles cadastrales' ? getPlotStyle :
+            title === 'Entreprises' ? getEnterpriseFeatureStyle :
             form === 'Polygon' ? defaultPolygonStyle :
                 defaultPointStyle;
 
