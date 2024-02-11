@@ -61,11 +61,11 @@ class Query(graphene.ObjectType):
                 )
 
             bbox_polygon = Polygon.from_bbox(bbox)
-            queryset = queryset.filter(geometry__within=bbox_polygon)
+            queryset = queryset.filter(geom__within=bbox_polygon)
 
         elif polygon:
             geom_geojson = GEOSGeometry(json.dumps(polygon))
-            queryset = queryset.filter(geometry__within=geom_geojson)
+            queryset = queryset.filter(geom__within=geom_geojson)
 
         if skip:
             queryset = queryset[skip:]
