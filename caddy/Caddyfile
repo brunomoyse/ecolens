@@ -1,13 +1,22 @@
 :80
 
-# Redirection vers le port 3000 pour tous les chemins sauf /admin
+# Redirection to django
 handle_path /admin* {
     reverse_proxy django:8000
+    rewrite * /admin{uri}
 }
 
-# Redirection vers le port 3000 pour tous les autres chemins
+handle_path /static/admin* {
+    reverse_proxy django:8000
+    rewrite * /static/admin{uri}
+}
+
+reverse_proxy /graphql* django:8000
+
+
+# redirect all remaining trafic to 3000
 handle {
     reverse_proxy frontend:3000
 }
 
-# log # if you need to display the logs
+# log  # if you need to display the logs
