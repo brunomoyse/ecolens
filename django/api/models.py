@@ -52,12 +52,15 @@ class Enterprises(models.Model):
         SECONDARY = "SECONDARY", "Secondary"
         TERTIARY = "TERTIARY", "Tertiary"
 
+    def __str__(self):
+        return self.name
+
     # TODO : not possible to chose the schema in Django,
     # having same table name in different schema
     # may be problematic
     id = models.UUIDField(primary_key=True)
-    establishment_number = models.TextField(blank=True, null=True)
-    enterprise_number = models.TextField(blank=True, null=True)
+    establishment_number = models.TextField(unique=True)
+    enterprise_number = models.TextField(unique=True)
     name = models.TextField(blank=True, null=True)
     name_commercial = models.TextField(blank=True, null=True)
     name_short = models.TextField(blank=True, null=True)
@@ -67,7 +70,6 @@ class Enterprises(models.Model):
     nace_other = models.TextField(blank=True, null=True)
     sector = models.TextField(blank=True, null=True, choices=Sector.choices)
     address_extra = models.TextField(blank=True, null=True)
-    address_id = models.UUIDField(blank=True, null=True)
     website = models.TextField(blank=True, null=True)
     email = models.TextField(blank=True, null=True)
     phone = models.TextField(blank=True, null=True)
@@ -75,8 +77,42 @@ class Enterprises(models.Model):
     reliability_index = models.IntegerField(blank=True, null=True)
     capakey = models.TextField(blank=True, null=True)
     extra_properties = models.JSONField(blank=True, null=True)
-    geom = models.GeometryField(blank=True, null=True, srid=31370)
+    geom = models.GeometryField(blank=True, srid=31370)
 
     class Meta:
         managed = False
         db_table = "enterprises"
+
+
+class Addresses(models.Model):
+
+    def __class__(self):
+        return f"{self.street_number} {self.street_name} {self.postal_code} {self.municipality}"
+
+    id = models.UUIDField(primary_key=True)
+    street_name = models.TextField(blank=True, null=True)
+    street_number = models.TextField(blank=True, null=True)
+    postal_code = models.TextField(blank=True, null=True)
+    municipality = models.TextField(blank=True, null=True)
+    district = models.TextField(blank=True, null=True)
+    province = models.TextField(blank=True, null=True)
+    region = models.TextField(blank=True, null=True)
+    dist_fuzzy = models.TextField(blank=True, null=True)
+    geom = models.GeometryField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = "addresses"
+
+
+class AddressEnterprise(models.Model):
+    id = models.UUIDField(primary_key=True)
+    address = models.ForeignKey(Addresses, on_delete=models.CASCADE)
+    enterprise = models.ForeignKey(
+        Enterprises, to_field="enterprise_number", on_delete=models.CASCADE
+    )
+    source = models.TextField()
+
+    class Meta:
+        managed = False
+        db_table = "address_enterprise"

@@ -1,8 +1,9 @@
+import logging
 from django.contrib import admin
 
-from .models import Layer, View, InputSource, InputSourceUpdate
+from .models import Layer, View, InputSource, InputSourceUpdate, \
+    Enterprises, Addresses, AddressEnterprise
 from .tasks import download_json_and_save_to_db
-import logging
 
 
 class LayerAdmin(admin.ModelAdmin):
@@ -40,6 +41,20 @@ class InputSourceAdmin(admin.ModelAdmin):
         return None
 
 
+class EnterprisesAdmin(admin.ModelAdmin):
+    list_display = ["id", "establishment_number", "enterprise_number", "name"]
+
+class AddressesAdmin(admin.ModelAdmin):
+    list_display = ["id", "street_name", "street_number", "postal_code", "municipality"]
+
+class AddressEnterpriseAdmin(admin.ModelAdmin):
+    #list_display = ["id", "enterprise", "address"]
+    pass
+
+
 admin.site.register(Layer, LayerAdmin)
 admin.site.register(View, ViewAdmin)
 admin.site.register(InputSource, InputSourceAdmin)
+admin.site.register(Enterprises, EnterprisesAdmin)
+admin.site.register(Addresses, AddressesAdmin)
+admin.site.register(AddressEnterprise, AddressEnterpriseAdmin)
