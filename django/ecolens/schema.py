@@ -27,7 +27,7 @@ class Query(graphene.ObjectType):
         first=graphene.Int(),
         skip=graphene.Int(),
         bbox=graphene.List(graphene.Float),
-        polygon=graphene.JSONString(),
+        wkt=graphene.String(),
         sector=graphene.String(),  # TODO VOIR SI EXISTE UNE ENUM
         nace=graphene.String(),
     )
@@ -40,7 +40,7 @@ class Query(graphene.ObjectType):
         first=None,
         skip=None,
         bbox=None,
-        polygon=None,
+        wkt=None,
         sector=None,
         nace=None,
     ):
@@ -66,9 +66,14 @@ class Query(graphene.ObjectType):
 
             queryset = queryset.filter(geom__within=bbox_polygon)
 
-        elif polygon:
-            geom_geojson = GEOSGeometry(json.dumps(polygon))
-            queryset = queryset.filter(geom__within=geom_geojson)
+        elif wkt:
+            wkt_polygon = GEOSGeometry(wkt)
+
+            if not wkt_polygon.srid:
+                wkt_polygon.srid = 4326
+
+            wkt_polygon.transform(31370)
+            queryset = queryset.filter(geom__within=wkt_polygon)
 
         if skip:
             queryset = queryset[skip:]
