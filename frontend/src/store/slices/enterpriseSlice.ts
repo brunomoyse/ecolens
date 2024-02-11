@@ -35,26 +35,25 @@ export const fetchEnterprises = createAsyncThunk(
             if (args.wkt) {
                 queryVariables = {
                     ...queryVariables,
-                    polygon: args.wkt,
+                    wkt: args.wkt,
                 }
             }
 
             const response = await apolloClient.query({
                 query: gql`
-                    query ($first: Int!, $bbox: [Float!], $polygon: JSONString) {
+                    query ($first: Int!, $bbox: [Float!], $wkt: String) {
                         enterprises(
                             first: $first, 
                             bbox: $bbox,
-                            polygon: $polygon
+                            wkt: $wkt
                         ) {
+                            id
+                            establishmentNumber
+                            enterpriseNumber
                             name
-                            #id
-                            #establishment_number
-                            #enterprise_number
-                            #name
-                            #form
-                            #sector
-                            #nace_main
+                            form
+                            sector
+                            naceMain
                         }
                     }
                 `,

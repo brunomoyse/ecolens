@@ -120,56 +120,7 @@ export default function MapComponent() {
         3
     );
 
-    const toggleDrawingInteraction = () => {
-        if (!map) return;
-        const drawingInteraction = map.getInteractions().getArray().find(interaction => interaction instanceof Draw);
 
-        if (isDrawing && !drawingInteraction) {
-            // Add drawing interaction
-            const vectorSource = new VectorSource();
-            const vectorLayer = createEmptyVectorLayerForDrawing(vectorSource);
-            vectorLayer.set('title', 'Drawing');
-            map.addLayer(vectorLayer);
-
-            const drawInteraction = new Draw({
-                source: vectorSource,
-                type: 'Polygon',
-            });
-            map.addInteraction(drawInteraction);
-            drawInteraction.on('drawend', (event) => {
-                if (event.feature) {
-                    console.log(map.getView().getProjection().getCode());
-
-                    // Transform the feature's geometry from EPSG:3857 to EPSG:4326
-                    const featureCopy = event.feature.clone();
-
-                    // Transform the feature's geometry from EPSG:3857 to EPSG:4326
-                    featureCopy.getGeometry()?.transform('EPSG:3857', 'EPSG:4326');
-
-                    // Initialize WKT format
-                    const wktFormat = new WKT();
-
-                    // Write the transformed feature's geometry to a WKT string
-                    const wktString = wktFormat.writeFeature(featureCopy, {
-                        dataProjection: 'EPSG:4326',
-                        featureProjection: 'EPSG:4326'
-                    });
-
-                    console.log('wktString', wktString)
-
-                    // Dispatch the WKT string or handle it as needed
-                    dispatch(setDrawnFeature(wktString));
-
-                    // Remove the draw interaction after drawing is complete
-                    map.removeInteraction(drawInteraction);
-                }
-
-            });
-        } else if (!isDrawing && drawingInteraction) {
-            // Remove drawing interaction
-            map.removeInteraction(drawingInteraction);
-        }
-    };
 
     useEffect(() => {
         if (!map) return;
@@ -222,6 +173,53 @@ export default function MapComponent() {
         // based on the `isDrawing` state.
         if (!map) return;
 
+        const toggleDrawingInteraction = () => {
+            if (!map) return;
+            const drawingInteraction = map.getInteractions().getArray().find(interaction => interaction instanceof Draw);
+
+            if (isDrawing && !drawingInteraction) {
+                // Add drawing interaction
+                const vectorSource = new VectorSource();
+                const vectorLayer = createEmptyVectorLayerForDrawing(vectorSource);
+                vectorLayer.set('title', 'Drawing');
+                map.addLayer(vectorLayer);
+
+                const drawInteraction = new Draw({
+                    source: vectorSource,
+                    type: 'Polygon',
+                });
+                map.addInteraction(drawInteraction);
+                drawInteraction.on('drawend', (event) => {
+                    if (event.feature) {
+                        // Transform the feature's geometry from EPSG:3857 to EPSG:4326
+                        const featureCopy = event.feature.clone();
+
+                        // Transform the feature's geometry from EPSG:3857 to EPSG:4326
+                        featureCopy.getGeometry()?.transform('EPSG:3857', 'EPSG:4326');
+
+                        // Initialize WKT format
+                        const wktFormat = new WKT();
+
+                        // Write the transformed feature's geometry to a WKT string
+                        const wktString = wktFormat.writeFeature(featureCopy, {
+                            dataProjection: 'EPSG:4326',
+                            featureProjection: 'EPSG:4326'
+                        });
+
+                        // Dispatch the WKT string or handle it as needed
+                        dispatch(setDrawnFeature(wktString));
+
+                        // Remove the draw interaction after drawing is complete
+                        map.removeInteraction(drawInteraction);
+                    }
+
+                });
+            } else if (!isDrawing && drawingInteraction) {
+                // Remove drawing interaction
+                map.removeInteraction(drawingInteraction);
+            }
+        };
+
         toggleDrawingInteraction();
 
         // Cleanup function
@@ -231,7 +229,7 @@ export default function MapComponent() {
                 map.removeInteraction(drawingInteraction);
             }
         };
-    }, [map, isDrawing]); // Dependency on `isDrawing` to re-evaluate when it changes
+    }, [dispatch, isDrawing, map]);
 
     return (
         <div id="map" className="h-screen w-screen">

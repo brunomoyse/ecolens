@@ -46,7 +46,6 @@ export const legendSlice = createSlice({
             const legendItem = action.payload as geoPortalLegendItem;
             // @ts-ignore
             state.geoPortalLegends.push(legendItem);
-            console.log(state.geoPortalLegends)
         });
     },
 });
