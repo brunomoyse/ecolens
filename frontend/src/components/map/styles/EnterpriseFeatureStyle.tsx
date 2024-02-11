@@ -10,7 +10,7 @@ export const getEnterpriseFeatureStyle = (feature: FeatureLike): Style => {
     const propertyValue = feature.get('sector');
 
     // Apply different styles based on the property value
-    if (propertyValue === 'Primary') {
+    if (propertyValue === 'PRIMARY') {
         return new Style({
             image: new Circle({
                 radius: 5,
@@ -19,7 +19,7 @@ export const getEnterpriseFeatureStyle = (feature: FeatureLike): Style => {
                 }),
             })
         });
-    } else if (propertyValue === 'Secondary') {
+    } else if (propertyValue === 'SECONDARY') {
         return new Style({
             image: new Circle({
                 radius: 5,
@@ -28,7 +28,7 @@ export const getEnterpriseFeatureStyle = (feature: FeatureLike): Style => {
                 }),
             })
         });
-    } else if (propertyValue === 'Tertiary') {
+    } else if (propertyValue === 'TERTIARY') {
         return new Style({
             image: new Circle({
                 radius: 5,

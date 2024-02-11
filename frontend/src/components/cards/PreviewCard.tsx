@@ -16,6 +16,8 @@ const PreviewCardMap: React.FC<PreviewCardMapProps> = ({ coordinate }) => {
     const dispatch = useAppDispatch();
     const selectedEnterprises = useAppSelector((state) => state.enterprise.selectedEnterprises);
 
+    console.log(selectedEnterprises)
+
     if (!coordinate || !selectedEnterprises || selectedEnterprises?.length === 0) return null;
 
     const positionStyle = {
@@ -33,14 +35,14 @@ const PreviewCardMap: React.FC<PreviewCardMapProps> = ({ coordinate }) => {
             <ScrollArea className={`${selectedEnterprises.length > 4 ? 'h-48' : 'h-auto'} rounded-md border`}>
                 <div className="p-2">
                     {selectedEnterprises.map((enterprise, index) => (
-                        <>
-                            <div onClick={() => handleSelectEnterprise(enterprise)} key={enterprise.establishment_number} className="flex text-md items-center px-2 py-1 hover:bg-gray-300 rounded-lg cursor-pointer">
-                                {enterprise.denomination}
+                        <div key={enterprise.establishment_number}>
+                            <div onClick={() => handleSelectEnterprise(enterprise)} className="flex text-md items-center px-2 py-1 hover:bg-gray-300 rounded-lg cursor-pointer">
+                                {enterprise.name}
                             </div>
                             {index !== selectedEnterprises.length - 1 && (
                                 <Separator className="my-1" />
                             )}
-                        </>
+                        </div>
                     ))}
                 </div>
             </ScrollArea>
