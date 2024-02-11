@@ -75,7 +75,7 @@ class Enterprises(models.Model):
     reliability_index = models.IntegerField(blank=True, null=True)
     capakey = models.TextField(blank=True, null=True)
     extra_properties = models.JSONField(blank=True, null=True)
-    geom = models.GeometryField(blank=True, null=True)
+    geom = models.GeometryField(blank=True, null=True, srid=31370)
 
     class Meta:
         managed = False

@@ -61,6 +61,9 @@ class Query(graphene.ObjectType):
                 )
 
             bbox_polygon = Polygon.from_bbox(bbox)
+            bbox_polygon.srid = 4326
+            bbox_polygon.transform(31370)
+
             queryset = queryset.filter(geom__within=bbox_polygon)
 
         elif polygon:
