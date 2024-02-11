@@ -103,8 +103,15 @@ export const enterpriseSlice = createSlice({
     initialState,
     reducers: {
         setSelectedEnterprises: (state, action) => {
+            // Make sure to only have unique enterprises (on establishment number)
+            const uniqueEnterprises = action.payload.filter((enterprise: Enterprise, index: number, self: Enterprise[]) =>
+                index === self.findIndex((t) => (
+                    t.establishment_number === enterprise.establishment_number
+                ))
+            );
+
             // Filter alphabetically by name
-            state.selectedEnterprises = action.payload.sort((a: Enterprise, b: Enterprise) => {
+            state.selectedEnterprises = uniqueEnterprises.sort((a: Enterprise, b: Enterprise) => {
                 if (a.name < b.name) {
                     return -1;
                 }
@@ -116,7 +123,6 @@ export const enterpriseSlice = createSlice({
         },
         setSelectedEnterprise: (state, action) => {
             state.selectedEnterprise = action.payload;
-            console.log(state.selectedEnterprise);
         }
     },
     extraReducers: (builder) => {
