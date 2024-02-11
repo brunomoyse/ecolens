@@ -21,14 +21,33 @@ export const fetchEnterprises = createAsyncThunk(
     'enterprise/fetchEnterprises',
     async (args: any, { rejectWithValue }) => {
         try {
+            let queryVariables: any = {
+                first: args.first || 5,
+            };
+
+            if (args.bbox) {
+                queryVariables = {
+                    ...queryVariables,
+                    bbox: args.bbox,
+                }
+            }
+
+            if (args.wkt) {
+                queryVariables = {
+                    ...queryVariables,
+                    polygon: args.wkt,
+                }
+            }
+
             const response = await apolloClient.query({
                 query: gql`
-                    query ($first: Int!, $bbox: [Float!]!) {
+                    query ($first: Int!, $bbox: [Float!], $polygon: JSONString) {
                         enterprises(
                             first: $first, 
-                            bbox: $bbox
+                            bbox: $bbox,
+                            polygon: $polygon
                         ) {
-                            nomDuSiegeDExploitation
+                            name
                             #id
                             #establishment_number
                             #enterprise_number
@@ -39,10 +58,7 @@ export const fetchEnterprises = createAsyncThunk(
                         }
                     }
                 `,
-                variables: {
-                    first: args.first || 5,
-                    bbox: args.bbox,
-                },
+                variables: queryVariables,
             });
             return response.data.enterprises;
         } catch (error) {
@@ -61,7 +77,7 @@ export const fetchEnterprise = createAsyncThunk(
                         enterprise(
                             id: $id
                         ) {
-                            nomDuSiegeDExploitation
+                            name
                             #id
                             #establishment_number
                             #enterprise_number
@@ -90,10 +106,10 @@ export const enterpriseSlice = createSlice({
         setSelectedEnterprises: (state, action) => {
             // Filter alphabetically by name
             state.selectedEnterprises = action.payload.sort((a: Enterprise, b: Enterprise) => {
-                if (a.nomDuSiegeDExploitation < b.nomDuSiegeDExploitation) {
+                if (a.name < b.name) {
                     return -1;
                 }
-                if (a.nomDuSiegeDExploitation > b.nomDuSiegeDExploitation) {
+                if (a.name > b.name) {
                     return 1;
                 }
                 return 0;

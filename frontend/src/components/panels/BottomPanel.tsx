@@ -31,6 +31,7 @@ export default function BottomPanel() {
 
     const dispatch = useAppDispatch();
     const enterprises = useAppSelector((state) => state.enterprise.enterprises);
+    const drawnFeature = useAppSelector((state) => state.drawing.drawnFeature);
 
     const panelRef = useRef<ImperativePanelHandle>(null);
     const [isPanelOpen, setIsPanelOpen] = useState(true);
@@ -48,9 +49,15 @@ export default function BottomPanel() {
         if (!map) return;
 
         const fetchData = () => {
-            const currentBbox3857 = map.getView().calculateExtent(map.getSize());
-            const bboxWGS84 = transformExtent(currentBbox3857, 'EPSG:3857', 'EPSG:4326');
-            dispatch(fetchEnterprises({ first: 5, bbox: bboxWGS84 }));
+            const args = { first: 5 };
+
+            if (drawnFeature) {
+                dispatch(fetchEnterprises({ ...args, wkt: drawnFeature }));
+            } else {
+                const currentBbox3857 = map.getView().calculateExtent(map.getSize());
+                const bboxWGS84 = transformExtent(currentBbox3857, 'EPSG:3857', 'EPSG:4326');
+                dispatch(fetchEnterprises({ ...args, bbox: bboxWGS84 }));
+            }
         };
 
         const debouncedFetchData = debounce(fetchData, 800);
@@ -62,7 +69,7 @@ export default function BottomPanel() {
         return () => {
             map.un('postrender', debouncedFetchData);
         };
-    }, [dispatch, map]);
+    }, [dispatch, drawnFeature, map]);
 
     return (
         <ResizablePanelGroup

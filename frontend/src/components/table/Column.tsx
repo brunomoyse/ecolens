@@ -6,7 +6,7 @@ import {Enterprise} from "@/types";
 export const columns: ColumnDef<Enterprise>[] = [
     {
         //accessorKey: "name",
-        accessorKey: "nomDuSiegeDExploitation",
+        accessorKey: "name",
         header: "Nom",
     },
     {
