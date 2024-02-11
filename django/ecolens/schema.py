@@ -1,40 +1,64 @@
+import json
 import graphene
 from graphene_django import DjangoObjectType
+from api.models import Layer, Enterprises
 from django.contrib.gis.geos import Polygon, GEOSGeometry
-import json
+from django.db.models import F
+from django.db.models.functions import LTrim
 
-from api.models import Layer, EntreprisesSpwSiegesExportation
 
-class EntreprisesSpwSiegesExportationType(DjangoObjectType):
+class EnterprisesType(DjangoObjectType):
     class Meta:
-        model = EntreprisesSpwSiegesExportation
-        fields = (
-            "ndeg_du_siege_social",
-            "nom_du_siege_social",
-            "nom_du_siege_d_exploitation")
+        model = Enterprises
+        exclude = ("geom",)
+
 
 class LayerType(DjangoObjectType):
     class Meta:
         model = Layer
         fields = ("id", "name", "url")
 
+
 class Query(graphene.ObjectType):
     all_layers = graphene.List(LayerType)
     layer_by_id = graphene.Field(LayerType, id=graphene.Int(required=True))
     enterprises = graphene.List(
-        EntreprisesSpwSiegesExportationType,
+        EnterprisesType,
         first=graphene.Int(),
         skip=graphene.Int(),
         bbox=graphene.List(graphene.Float),
         polygon=graphene.JSONString(),
+        sector=graphene.String(),  # TODO VOIR SI EXISTE UNE ENUM
+        nace=graphene.String(),
     )
+    csv = graphene.String()
 
-    def resolve_enterprises(self, info, first=None, skip=None, bbox=None, polygon=None):
-        queryset = EntreprisesSpwSiegesExportation.objects.all()
+
+    def resolve_enterprises(
+        self,
+        info,
+        first=None,
+        skip=None,
+        bbox=None,
+        polygon=None,
+        sector=None,
+        nace=None,
+    ):
+        queryset = Enterprises.objects.all()
+
+        if nace:
+            queryset = queryset.annotate(trimmed_value=LTrim(F("nace_main"))).filter(
+                trimmed_value__startswith=nace
+            )
+
+        if sector:
+            queryset = queryset.filter(sector=sector)
 
         if bbox:
             if len(bbox) != 4:
-                raise ValueError("La bbox doit contenir exactement 4 éléments (min_lon, min_lat, max_lon, max_lat)")
+                raise ValueError(
+                    "The bbox must contain exactly 4 elements (min_lon, min_lat, max_lon, max_lat)"
+                )
 
             bbox_polygon = Polygon.from_bbox(bbox)
             queryset = queryset.filter(geometry__within=bbox_polygon)
@@ -51,14 +75,15 @@ class Query(graphene.ObjectType):
 
         return queryset
 
-    def resolve_all_layers(root, info):
+    def resolve_all_layers(self, _):
         # We can easily optimize query count in the resolve method
         return Layer.objects.all()
 
-    def resolve_layer_by_id(root, info, id):
+    def resolve_layer_by_id(self, info, id):
         try:
             return Layer.objects.get(pk=id)
         except Layer.DoesNotExist:
             return None
+
 
 schema = graphene.Schema(query=Query)
