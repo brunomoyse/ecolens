@@ -46,6 +46,14 @@ django# python manage.py makemigrations    # check the models and create automat
 django# python manage.py migrate           # run the migrations
 ```
 
+#### Get "centrale des bilans infos"
+
+
+```bash
+      $ docker-compose exec django
+django# python3 manage.py  fetch_accounting_data 0419.859.055
+```
+
 ## Deployment on the server
 
 ### Build the docker images
