@@ -65,7 +65,7 @@ class Enterprises(models.Model):
     name_commercial = models.TextField(blank=True, null=True)
     name_short = models.TextField(blank=True, null=True)
     form = models.TextField(blank=True, null=True)
-    start_date = models.DateTimeField(blank=True, null=True)
+    start_date = models.DateField(blank=True, null=True)
     nace_main = models.TextField(blank=True, null=True)
     nace_other = models.TextField(blank=True, null=True)
     sector = models.TextField(blank=True, null=True, choices=Sector.choices)
