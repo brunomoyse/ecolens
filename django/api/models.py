@@ -98,7 +98,7 @@ class Addresses(models.Model):
     province = models.TextField(blank=True, null=True)
     region = models.TextField(blank=True, null=True)
     dist_fuzzy = models.TextField(blank=True, null=True)
-    geom = models.GeometryField(blank=True, null=True)
+    geom = models.GeometryField(blank=True, srid=31370)
 
     class Meta:
         managed = False
@@ -108,9 +108,7 @@ class Addresses(models.Model):
 class AddressEnterprise(models.Model):
     id = models.UUIDField(primary_key=True)
     address = models.ForeignKey(Addresses, on_delete=models.CASCADE)
-    enterprise = models.ForeignKey(
-        Enterprises, to_field="enterprise_number", on_delete=models.CASCADE
-    )
+    enterprise = models.ForeignKey(Enterprises, on_delete=models.CASCADE)
     source = models.TextField()
 
     class Meta:
