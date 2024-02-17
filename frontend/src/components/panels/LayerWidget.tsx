@@ -213,7 +213,7 @@ export default function LayerWidget() {
                                                 <div className="w-5 h-5 bg-transparent ring-4 ring-black ring-inset flex items-center justify-center" />
                                             </div>
                                             <span className="ml-2 text-sm">
-                                                Parcelles cadastrales
+                                                Limites intercommunales
                                             </span>
                                         </div>
                                     </>
