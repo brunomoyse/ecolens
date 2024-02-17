@@ -33,7 +33,6 @@ class Query(graphene.ObjectType):
     )
     csv = graphene.String()
 
-
     def resolve_enterprises(
         self,
         info,
@@ -64,7 +63,9 @@ class Query(graphene.ObjectType):
             bbox_polygon.srid = 4326
             bbox_polygon.transform(31370)
 
-            queryset = queryset.filter(geom__within=bbox_polygon)
+            queryset = queryset.filter(
+                addressenterprise__address__geom__within=bbox_polygon
+            )
 
         elif wkt:
             wkt_polygon = GEOSGeometry(wkt)
@@ -73,7 +74,10 @@ class Query(graphene.ObjectType):
                 wkt_polygon.srid = 4326
 
             wkt_polygon.transform(31370)
-            queryset = queryset.filter(geom__within=wkt_polygon)
+
+            queryset = queryset.filter(
+                addressenterprise__address__geom__within=wkt_polygon
+            )
 
         if skip:
             queryset = queryset[skip:]
