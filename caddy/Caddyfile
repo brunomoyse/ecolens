@@ -1,17 +1,22 @@
 :80
 
+handle_path /static/* {
+    root * /usr/share/caddy/
+    file_server
+}
+
+
 # Redirection to django
 handle_path /admin* {
     reverse_proxy django:8000
     rewrite * /admin{uri}
 }
 
-handle_path /static/admin* {
-    reverse_proxy django:8000
-    rewrite * /static/admin{uri}
-}
 
-reverse_proxy /graphql* django:8000
+handle_path /graphql* {
+    reverse_proxy django:8000
+    rewrite * /graphql{uri}
+}
 
 
 # redirect all remaining trafic to 3000

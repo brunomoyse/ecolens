@@ -14,15 +14,12 @@ Including another URLconf
     1. Import the include() function: from ecolens.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from django.contrib import admin
 from django.urls import path
-from graphene_django.views import GraphQLView
-from django.conf import settings
-from django.conf.urls.static import static
 from ecolens.graphqlviews import CSVGraphQLView
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path("graphql", CSVGraphQLView.as_view(graphiql=True)),
-# todo remove static loading in production
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    path("admin/", admin.site.urls),
+    path("graphql/", CSVGraphQLView.as_view(graphiql=True)),
+]

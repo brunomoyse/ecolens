@@ -10,6 +10,7 @@ services:
       - "./caddy/Caddyfile:/etc/caddy/Caddyfile"
       - "caddy_data:/data"
       - "caddy_config:/config"
+      - "django_static_files:/usr/share/caddy/"
     restart: unless-stopped
   frontend:
     build:
@@ -41,6 +42,7 @@ services:
       - "8000:8000"
     volumes:
       - "./django:/usr/src/app"
+      - "django_static_files:/usr/src/app/static"
     environment:
       - POSTGRES_HOST=${POSTGRES_HOST}
       - POSTGRES_PORT=${POSTGRES_PORT}
@@ -51,7 +53,7 @@ services:
       - DEBUG=1
       #  - ALLOWED_HOST=${SERVER_IP}
     # command: bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
-    command: python manage.py runserver 0.0.0.0:8000
+    command: gunicorn ecolens.wsgi:application --workers 4 --bind 0.0.0.0:8000
 
   celery:
     image: ecolens/django
@@ -78,3 +80,4 @@ services:
 volumes:
   caddy_data:
   caddy_config:
+  django_static_files:
