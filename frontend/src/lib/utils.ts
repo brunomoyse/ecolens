@@ -12,6 +12,14 @@ type UseDraggableProps = {
   elementId: string;
 };
 
+const formatDateBE = (date: string) => {
+    return new Date(date).toLocaleDateString('fr-BE', {
+        year: 'numeric',
+        month: 'numeric',
+        day: 'numeric'
+    });
+}
+
 const createTileLayerFromUrl = (url: string) => {
   return new TileLayer({
     source: new TileArcGISRest({
@@ -124,4 +132,4 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export {createTileLayerFromUrl, createEmptyVectorLayerForDrawing, useDraggable};
+export {formatDateBE, createTileLayerFromUrl, createEmptyVectorLayerForDrawing, useDraggable};

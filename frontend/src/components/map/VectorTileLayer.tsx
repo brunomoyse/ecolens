@@ -32,6 +32,7 @@ const createVectorTileLayer = (
         zIndex: zIndex,
         minZoom: minZoom,
         style: getStyle,
+        declutter: false
     });
 
     layer.set('title', title);

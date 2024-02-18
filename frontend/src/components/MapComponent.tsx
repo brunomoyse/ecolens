@@ -88,6 +88,7 @@ export default function MapComponent() {
         2,
         15.5
     )
+    plotLayer.setVisible(false);
 
     const relayBuildingsLayer = new TileLayer({
         source: new TileArcGISRest({
