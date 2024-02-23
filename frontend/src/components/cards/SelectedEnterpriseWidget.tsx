@@ -40,7 +40,7 @@ export default function SelectedEnterpriseWidget() {
                 </div>
                 <X onClick={unselectEnterprise} className="w-6 h-6 z-50 cursor-pointer"/>
             </header>
-            <Tabs defaultValue="account" className="w-[400px]">
+            <Tabs defaultValue="info" className="w-[400px] max-w-[400px]">
                 <TabsList className="flex">
                     <TabsTrigger value="info" className="w-full">Informations</TabsTrigger>
                     <TabsTrigger value="report" className="w-full">Bilan</TabsTrigger>
