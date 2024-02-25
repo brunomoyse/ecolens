@@ -1,5 +1,5 @@
+from django.contrib.postgres.fields import ArrayField
 from django.contrib.gis.db import models
-
 
 class InputSourceUpdate(models.Model):
     class Status(models.TextChoices):
@@ -48,9 +48,9 @@ class Enterprises(models.Model):
     """Final enterprises (displayed on the map)"""
 
     class Sector(models.TextChoices):
-        PRIMARY = "PRIMARY", "Primary"
-        SECONDARY = "SECONDARY", "Secondary"
-        TERTIARY = "TERTIARY", "Tertiary"
+        PRIMARY = "PRIMARY", "PRIMARY"
+        SECONDARY = "SECONDARY", "SECONDARY"
+        TERTIARY = "TERTIARY", "TERTIARY"
 
     def __str__(self):
         return self.name
@@ -66,9 +66,9 @@ class Enterprises(models.Model):
     name_short = models.TextField(blank=True, null=True)
     form = models.TextField(blank=True, null=True)
     start_date = models.DateField(blank=True, null=True)
-    nace_main = models.TextField(blank=True, null=True)
-    nace_other = models.TextField(blank=True, null=True)
-    sector = models.TextField(blank=True, null=True, choices=Sector.choices)
+    nace_main = ArrayField(models.TextField(blank=True), blank=True, null=True, default=list)
+    nace_other = ArrayField(models.TextField(blank=True), blank=True, null=True, default=list)
+    sector = models.CharField(max_length=10, blank=True, null=True, choices=Sector.choices)
     address_extra = models.TextField(blank=True, null=True)
     website = models.TextField(blank=True, null=True)
     email = models.TextField(blank=True, null=True)

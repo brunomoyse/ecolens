@@ -18,6 +18,10 @@ class LayerType(DjangoObjectType):
         model = Layer
         fields = ("id", "name", "url")
 
+class SectorEnum(graphene.Enum):
+    PRIMARY = "PRIMARY"
+    SECONDARY = "SECONDARY"
+    TERTIARY = "TERTIARY"
 
 class Query(graphene.ObjectType):
     all_layers = graphene.List(LayerType)
@@ -28,8 +32,9 @@ class Query(graphene.ObjectType):
         skip=graphene.Int(),
         bbox=graphene.List(graphene.Float),
         wkt=graphene.String(),
-        sector=graphene.String(),  # TODO VOIR SI EXISTE UNE ENUM
-        nace=graphene.String(),
+        sector=graphene.Argument(SectorEnum),
+        naceMain=graphene.List(graphene.String),
+        naceOther=graphene.List(graphene.String),
     )
     csv = graphene.String()
 
@@ -41,13 +46,14 @@ class Query(graphene.ObjectType):
         bbox=None,
         wkt=None,
         sector=None,
-        nace=None,
+        naceMain=None,
+        naceOther=None,
     ):
         queryset = Enterprises.objects.all()
 
-        if nace:
+        if naceMain:
             queryset = queryset.annotate(trimmed_value=LTrim(F("nace_main"))).filter(
-                trimmed_value__startswith=nace
+                trimmed_value__startswith=naceMain
             )
 
         if sector:
