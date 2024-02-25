@@ -51,7 +51,6 @@ export default function BottomPanel() {
         const fetchData = () => {
             let args: any = { first: 5 };
 
-
             if (drawnFeature) {
                 args = { ...args, wkt: drawnFeature };
                 dispatch(fetchEnterprises({ ...args, wkt: drawnFeature }));

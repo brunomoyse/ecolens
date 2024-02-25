@@ -1,7 +1,12 @@
 import {Button} from "@/components/ui/button";
 import {useAppDispatch, useAppSelector} from "@/store/hooks";
-import {setDrawingState, setDrawnFeature} from "@/store/slices/drawingSlice";
-import {Eraser, Pencil, Download} from "lucide-react";
+import {
+    setDrawingCircleState,
+    setDrawingPolygonState,
+    setDrawnCircle,
+    setDrawnFeature
+} from "@/store/slices/drawingSlice";
+import {Eraser, Pencil, Download, CircleDotDashed} from "lucide-react";
 import {useMap} from "@/context/map-context";
 import { Parser } from 'json2csv';
 import {ReloadIcon} from "@radix-ui/react-icons";
@@ -17,13 +22,18 @@ export default function BarButtons() {
     // Exporting state
     const [isExporting, setIsExporting] = useState(false);
 
-    const handleSetDrawing = () => {
-        dispatch(setDrawingState(true));
+    const handleSetDrawingPolygon = () => {
+        dispatch(setDrawingPolygonState(true));
+    };
+    const handleSetDrawingCircle = () => {
+        dispatch(setDrawingCircleState(true));
     };
 
     const handleClearDraw = () => {
-        dispatch(setDrawingState(false));
+        dispatch(setDrawingPolygonState(false));
+        dispatch(setDrawingCircleState(false));
         dispatch(setDrawnFeature(null));
+        dispatch(setDrawnCircle(null));
         map?.getLayers().forEach((layer) => {
             if (layer.get('title') === 'Drawing') {
                 map.removeLayer(layer);
@@ -63,8 +73,16 @@ export default function BarButtons() {
 
     return (
         <div className="flex flex-col absolute top-1/4 right-0 z-50 -translate-x-1/2 buttons-bar">
+            {/* Circle */}
             {!drawingState.drawnFeature && (
-            <Button onClick={handleSetDrawing} variant="outline" size="icon" className={`h-12 w-12 rounded-full border-2 border-red-600 mb-4 ${drawingState.isDrawing ? 'bg-gray-300' : ''}`}>
+                <Button onClick={handleSetDrawingCircle} variant="outline" size="icon" className={`h-12 w-12 rounded-full border-2 border-red-600 mb-4 ${drawingState.isDrawingCircle ? 'bg-gray-300' : ''}`}>
+                    <CircleDotDashed className="h-6 w-6" />
+                </Button>
+            )}
+
+            {/* Polygon */}
+            {!drawingState.drawnFeature && (
+            <Button onClick={handleSetDrawingPolygon} variant="outline" size="icon" className={`h-12 w-12 rounded-full border-2 border-red-600 mb-4 ${drawingState.isDrawingPolygon ? 'bg-gray-300' : ''}`}>
                 <Pencil className="h-6 w-6" />
             </Button>
             )}
@@ -73,6 +91,7 @@ export default function BarButtons() {
                     <Eraser className="h-6 w-6" />
                 </Button>
             )}
+            {/* Export */}
             <Button onClick={handleExport} variant="outline" size="icon" className="h-12 w-12 rounded-full border-2 border-red-600 mb-4">
                 {isExporting ? <ReloadIcon className="mr-2 h-4 w-4 animate-spin" /> : <Download className="h-6 w-6" />}
             </Button>

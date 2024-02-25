@@ -43,6 +43,36 @@ const createEmptyVectorLayerForDrawing = (vectorSource: VectorSource): VectorLay
   });
 }
 
+const createCircleWkt = (center: number[], angularRadiusInDegrees: number, numPoints: number = 32) => {
+  const earthRadius = 6371000; // Earth's radius in meters
+  const latitudeRadians = center[1] * Math.PI / 180;
+  // Convert angular radius in degrees to meters; 1 degree of latitude is approximately 111 km
+  const angularRadiusInMeters = angularRadiusInDegrees * 111000; // Rough approximation
+  const coordinates = [];
+  const angleStep = (Math.PI * 2) / numPoints;
+
+  for (let i = 0; i < numPoints; i++) {
+    const angle = i * angleStep;
+    // Approximate conversion of radius from meters to degrees
+    const dx = angularRadiusInMeters * Math.cos(angle);
+    const dy = angularRadiusInMeters * Math.sin(angle);
+    // Convert offsets in meters back to degrees for latitude and longitude
+    const deltaLongitude = dx / (earthRadius * Math.cos(latitudeRadians)) * (180 / Math.PI);
+    const deltaLatitude = dy / earthRadius * (180 / Math.PI);
+    const longitude = center[0] + deltaLongitude;
+    const latitude = center[1] + deltaLatitude;
+    coordinates.push([longitude.toFixed(6), latitude.toFixed(6)]);
+  }
+
+  // Close the polygon by repeating the first coordinate
+  coordinates.push(coordinates[0]);
+
+  // Convert coordinates to WKT
+  const wkt = "POLYGON((" + coordinates.map(coord => coord.join(" ")).join(", ") + "))";
+  return wkt;
+};
+
+
 const useDraggable = (elementId: string, dragHandleId: string) => {
   useEffect(() => {
     const draggableElement = document.getElementById(elementId);
@@ -132,4 +162,4 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export {formatDateBE, createTileLayerFromUrl, createEmptyVectorLayerForDrawing, useDraggable};
+export {createCircleWkt, formatDateBE, createTileLayerFromUrl, createEmptyVectorLayerForDrawing, useDraggable};

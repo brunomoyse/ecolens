@@ -22,6 +22,9 @@ import { setSelectedEnterprises } from "@/store/slices/enterpriseSlice";
 import { setSelectedEap } from "@/store/slices/eapSlice";
 import { WKT } from "ol/format";
 import { fetchGeoPortalLegend } from "@/store/slices/legendSlice";
+import {Type} from "ol/geom/Geometry";
+import { createCircleWkt } from "@/lib/utils";
+import {Circle, Polygon} from "ol/geom";
 
 // Namur's geographic coordinates (WGS84)
 const namurGeoCoords = [4.8717, 50.4670];
@@ -39,7 +42,8 @@ const osmLayer = new TileLayer({
 
 export default function MapComponent() {
     const { map, addLayer } = useMap();
-    const isDrawing = useAppSelector((state) => state.drawing.isDrawing);
+    const isDrawingPolygon = useAppSelector((state) => state.drawing.isDrawingPolygon);
+    const isDrawingCircle = useAppSelector((state) => state.drawing.isDrawingCircle);
     const drawnFeature = useAppSelector((state) => state.drawing.drawnFeature);
     const dispatch = useAppDispatch();
 
@@ -125,7 +129,7 @@ export default function MapComponent() {
 
     useEffect(() => {
         if (!map) return;
-        if (isDrawing) return;
+        if (isDrawingPolygon || isDrawingCircle) return;
 
         // Click interaction
         map.on('click', function (evt) {
@@ -150,8 +154,7 @@ export default function MapComponent() {
             // Reset the selected feature when the map is moved
             setPreviewCardCoordinate(undefined);
         });
-    }, [map, isDrawing, drawnFeature]); // eslint-disable-line
-
+    }, [map, isDrawingPolygon, isDrawingCircle, drawnFeature]); // eslint-disable-line
 
     useEffect(() => {
         if (!map) return;
@@ -170,67 +173,64 @@ export default function MapComponent() {
     }, [map]); // eslint-disable-line
 
     useEffect(() => {
-        // This effect could solely be responsible for managing the drawing interaction
-        // based on the `isDrawing` state.
         if (!map) return;
 
-        const toggleDrawingInteraction = () => {
-            if (!map) return;
-            const drawingInteraction = map.getInteractions().getArray().find(interaction => interaction instanceof Draw);
+        const createDrawingInteraction = (type: Type) => {
+            const vectorSource = new VectorSource();
+            const vectorLayer = createEmptyVectorLayerForDrawing(vectorSource);
+            vectorLayer.set('title', 'Drawing');
+            map.addLayer(vectorLayer);
+
+            const drawInteraction = new Draw({
+                source: vectorSource,
+                type: type,
+            });
+            map.addInteraction(drawInteraction);
+
+            drawInteraction.on('drawend', (event) => {
+                let wktString = '';
+                const featureCopy = event.feature.clone();
+                const featureGeometry = featureCopy.getGeometry();
+                featureGeometry!.transform('EPSG:3857', 'EPSG:4326');
+
+                if (featureGeometry && featureGeometry instanceof Polygon) {
+                    featureGeometry!.transform('EPSG:3857', 'EPSG:4326');
+                    const wktFormat = new WKT();
+                    wktString = wktFormat.writeFeature(featureCopy, {
+                        dataProjection: 'EPSG:4326',
+                        featureProjection: 'EPSG:4326'
+                    });
+                } else if (featureGeometry instanceof Circle) {
+                    const radius = featureGeometry.getRadius();
+                    const center = featureGeometry.getCenter();
+
+                    wktString = createCircleWkt(center, radius, 32)
+                }
+
+                dispatch(setDrawnFeature(wktString));
+                map.removeInteraction(drawInteraction);
+            });
+        };
+
+        const toggleDrawingInteraction = (isDrawing: boolean, type: Type) => {
+            const drawingInteraction = map.getInteractions().getArray().find(interaction => interaction instanceof Draw && interaction.get('type') === type);
 
             if (isDrawing && !drawingInteraction) {
-                // Add drawing interaction
-                const vectorSource = new VectorSource();
-                const vectorLayer = createEmptyVectorLayerForDrawing(vectorSource);
-                vectorLayer.set('title', 'Drawing');
-                map.addLayer(vectorLayer);
-
-                const drawInteraction = new Draw({
-                    source: vectorSource,
-                    type: 'Polygon',
-                });
-                map.addInteraction(drawInteraction);
-                drawInteraction.on('drawend', (event) => {
-                    if (event.feature) {
-                        // Transform the feature's geometry from EPSG:3857 to EPSG:4326
-                        const featureCopy = event.feature.clone();
-
-                        // Transform the feature's geometry from EPSG:3857 to EPSG:4326
-                        featureCopy.getGeometry()?.transform('EPSG:3857', 'EPSG:4326');
-
-                        // Initialize WKT format
-                        const wktFormat = new WKT();
-
-                        // Write the transformed feature's geometry to a WKT string
-                        const wktString = wktFormat.writeFeature(featureCopy, {
-                            dataProjection: 'EPSG:4326',
-                            featureProjection: 'EPSG:4326'
-                        });
-
-                        // Dispatch the WKT string or handle it as needed
-                        dispatch(setDrawnFeature(wktString));
-
-                        // Remove the draw interaction after drawing is complete
-                        map.removeInteraction(drawInteraction);
-                    }
-
-                });
+                createDrawingInteraction(type);
             } else if (!isDrawing && drawingInteraction) {
-                // Remove drawing interaction
                 map.removeInteraction(drawingInteraction);
             }
         };
 
-        toggleDrawingInteraction();
+        toggleDrawingInteraction(isDrawingPolygon, 'Polygon');
+        toggleDrawingInteraction(isDrawingCircle, 'Circle');
 
-        // Cleanup function
         return () => {
-            const drawingInteraction = map.getInteractions().getArray().find(interaction => interaction instanceof Draw);
-            if (drawingInteraction) {
-                map.removeInteraction(drawingInteraction);
-            }
+            const drawingInteractions = map.getInteractions().getArray().filter(interaction => interaction instanceof Draw);
+            drawingInteractions.forEach(interaction => map.removeInteraction(interaction));
         };
-    }, [dispatch, isDrawing, map]);
+    }, [dispatch, isDrawingPolygon, isDrawingCircle, map]);
+
 
     return (
         <div id="map" className="h-screen w-screen">
