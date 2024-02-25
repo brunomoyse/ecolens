@@ -187,6 +187,18 @@ export default function LayerWidget() {
                                                 Secteur tertiaire
                                             </span>
                                         </div>
+                                        {/* Unknown sector */}
+                                        <div className="flex items-center ml-2 pl-2 border-l-2 border-l-black ">
+                                            <div className="flex flex-col justify-center">
+                                                <div className="w-5 h-5 flex justify-center items-center">
+                                                    {/* Gray point */}
+                                                    <div className="w-2.5 h-2.5 bg-gray-600 rounded-full"></div>
+                                                </div>
+                                            </div>
+                                            <span className="ml-2 text-sm">
+                                                Secteur inconnu
+                                            </span>
+                                        </div>
 
                                     </>
                                 )}

@@ -44,7 +44,7 @@ export const getEnterpriseFeatureStyle = (feature: FeatureLike): Style => {
         image: new Circle({
             radius: 5,
             fill: new Fill({
-                color: '#E879F9'
+                color: '#475569'
             }),
         }),
         stroke: new Stroke({
