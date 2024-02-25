@@ -16,8 +16,6 @@ const PreviewCardMap: React.FC<PreviewCardMapProps> = ({ coordinate }) => {
     const dispatch = useAppDispatch();
     const selectedEnterprises = useAppSelector((state) => state.enterprise.selectedEnterprises);
 
-    console.log(selectedEnterprises)
-
     if (!coordinate || !selectedEnterprises || selectedEnterprises?.length === 0) return null;
 
     const positionStyle = {

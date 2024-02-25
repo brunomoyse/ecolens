@@ -63,7 +63,7 @@ export default function BottomPanel() {
             dispatch(fetchEnterprises({ ...args }))
         };
 
-        const debouncedFetchData = debounce(fetchData, 1500);
+        const debouncedFetchData = debounce(fetchData, 800);
 
         // Listen for the postrender event
         map.on('postrender', debouncedFetchData);

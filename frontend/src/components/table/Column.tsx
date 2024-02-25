@@ -20,4 +20,8 @@ export const columns: ColumnDef<Enterprise>[] = [
         accessorKey: "form",
         header: "Forme",
     },
+    {
+        accessorKey: "sector",
+        header: "Secteur",
+    },
 ]
