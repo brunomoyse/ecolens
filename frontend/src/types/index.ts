@@ -76,7 +76,16 @@ interface IntercommunalEnterprise {
     geometry: Geometry
 }
 
+interface Pagination {
+    total: number;
+    perPage: number;
+    currentPage: number;
+    lastPage: number;
+    firstPage: number;
+}
+
 export type {
+    Pagination,
     legendArcGis,
     geoPortalService,
     Enterprise,

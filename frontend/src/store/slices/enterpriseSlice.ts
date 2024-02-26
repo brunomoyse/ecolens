@@ -1,18 +1,20 @@
 // Import createAsyncThunk
 import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
-import {Enterprise} from '@/types';
+import {Enterprise, Pagination} from '@/types';
 import gql from "graphql-tag";
 import apolloClient from "@/lib/apollo-client";
 
 // Define the initial state
 interface EnterpriseState {
-    enterprises: Enterprise[];
+    enterprisesData: Enterprise[];
+    enterprisesPagination: Pagination | null;
     selectedEnterprises: Enterprise[] | null;
     selectedEnterprise: Enterprise | null;
 }
 
 const initialState: EnterpriseState = {
-    enterprises: [],
+    enterprisesData: [],
+    enterprisesPagination: null,
     selectedEnterprises: null,
     selectedEnterprise: null,
 };
@@ -41,19 +43,28 @@ export const fetchEnterprises = createAsyncThunk(
 
             const response = await apolloClient.query({
                 query: gql`
-                    query ($first: Int!, $bbox: [Float!], $wkt: String) {
-                        enterprises(
-                            first: $first, 
-                            bbox: $bbox,
-                            wkt: $wkt
-                        ) {
-                            id
-                            establishmentNumber
-                            enterpriseNumber
-                            name
-                            form
-                            sector
-                            naceMain
+                    query ($pageSize: Int, $page: Int, $bbox: [Float!], $wkt: String) {
+                        enterprises(pageSize: $pageSize, page: $page, bbox: $bbox, wkt: $wkt) {
+                            pagination {
+                                total
+                                perPage
+                                currentPage
+                                lastPage
+                                firstPage
+                            }
+                            data {
+                                id
+                                establishmentNumber
+                                enterpriseNumber
+                                name
+                                form
+                                sector
+                                naceMain
+                                naceOther
+                                reliabilityIndex
+                                __typename
+                            }
+
                         }
                     }
                 `,
@@ -123,15 +134,21 @@ export const enterpriseSlice = createSlice({
         },
         setSelectedEnterprise: (state, action) => {
             state.selectedEnterprise = action.payload;
+        },
+        updateCurrentPage: (state, action) => {
+            if (state.enterprisesPagination) {
+                state.enterprisesPagination.currentPage = action.payload;
+            }
         }
     },
     extraReducers: (builder) => {
         // Handle actions defined by createAsyncThunk or other extraReducers
         builder.addCase(fetchEnterprises.fulfilled, (state, action) => {
-            state.enterprises = action.payload;
+            state.enterprisesData = action.payload.data;
+            state.enterprisesPagination = action.payload.pagination;
         });
     },
 });
 
-export const { setSelectedEnterprises, setSelectedEnterprise } = enterpriseSlice.actions;
+export const { updateCurrentPage, setSelectedEnterprises, setSelectedEnterprise } = enterpriseSlice.actions;
 export default enterpriseSlice.reducer;

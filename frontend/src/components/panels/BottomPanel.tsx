@@ -1,15 +1,6 @@
 import {useEffect, useRef, useState} from 'react';
 import {DataTable} from "@/components/table/DataTable";
-
-import {
-    Pagination,
-    PaginationContent,
-    PaginationEllipsis,
-    PaginationItem,
-    PaginationLink,
-    PaginationNext,
-    PaginationPrevious,
-} from "@/components/ui/pagination"
+import DynamicPagination from "@/components/table/DynamicPagination";
 
 import {
     ResizableHandle,
@@ -30,7 +21,8 @@ export default function BottomPanel() {
     const { map } = useMap();
 
     const dispatch = useAppDispatch();
-    const enterprises = useAppSelector((state) => state.enterprise.enterprises);
+    const enterprises = useAppSelector((state) => state.enterprise.enterprisesData);
+    const currentPagination = useAppSelector((state) => state.enterprise.enterprisesPagination);
     const drawnFeature = useAppSelector((state) => state.drawing.drawnFeature);
 
     const panelRef = useRef<ImperativePanelHandle>(null);
@@ -45,23 +37,23 @@ export default function BottomPanel() {
         setIsPanelOpen(!isPanelOpen); // Toggle panel state
     };
 
-    useEffect(() => {
+    const fetchData = (args: any) => {
         if (!map) return;
 
-        const fetchData = () => {
-            let args: any = { first: 5 };
+        if (drawnFeature) {
+            args = { ...args, wkt: drawnFeature };
+            dispatch(fetchEnterprises({ ...args, wkt: drawnFeature }));
+        } else {
+            const currentBbox3857 = map.getView().calculateExtent(map.getSize());
+            const bboxWGS84 = transformExtent(currentBbox3857, 'EPSG:3857', 'EPSG:4326');
+            args = { ...args, bbox: bboxWGS84 };
+        }
 
-            if (drawnFeature) {
-                args = { ...args, wkt: drawnFeature };
-                dispatch(fetchEnterprises({ ...args, wkt: drawnFeature }));
-            } else {
-                const currentBbox3857 = map.getView().calculateExtent(map.getSize());
-                const bboxWGS84 = transformExtent(currentBbox3857, 'EPSG:3857', 'EPSG:4326');
-                args = { ...args, bbox: bboxWGS84 };
-            }
+        dispatch(fetchEnterprises({ ...args }))
+    };
 
-            dispatch(fetchEnterprises({ ...args }))
-        };
+    useEffect(() => {
+        if (!map) return;
 
         const debouncedFetchData = debounce(fetchData, 800);
 
@@ -72,7 +64,7 @@ export default function BottomPanel() {
         return () => {
             map.un('postrender', debouncedFetchData);
         };
-    }, [map, dispatch, drawnFeature]);
+    }, [map, dispatch, drawnFeature, currentPagination, fetchData]);
 
     return (
         <ResizablePanelGroup
@@ -104,39 +96,7 @@ export default function BottomPanel() {
                     <div className="container mx-auto" style={{pointerEvents: 'auto'}}>
                         {enterprises && <DataTable columns={columns} data={enterprises}/>}
                     </div>
-                    <Pagination style={{pointerEvents: 'auto'}}>
-                        <PaginationContent>
-                            <PaginationItem>
-                                <PaginationPrevious href="#"/>
-                            </PaginationItem>
-                            <PaginationItem>
-                                <PaginationLink href="#" isActive>
-                                    1
-                                </PaginationLink>
-                            </PaginationItem>
-                            <PaginationItem>
-                                <PaginationLink href="#">
-                                    2
-                                </PaginationLink>
-                            </PaginationItem>
-                            <PaginationItem>
-                                <PaginationLink href="#">
-                                    3
-                                </PaginationLink>
-                            </PaginationItem>
-                            <PaginationItem>
-                                <PaginationEllipsis/>
-                            </PaginationItem>
-                            <PaginationItem>
-                                <PaginationLink href="#">
-                                    10
-                                </PaginationLink>
-                            </PaginationItem>
-                            <PaginationItem>
-                                <PaginationNext href="#"/>
-                            </PaginationItem>
-                        </PaginationContent>
-                    </Pagination>
+                    <DynamicPagination />
                 </aside>
             </ResizablePanel>
         </ResizablePanelGroup>

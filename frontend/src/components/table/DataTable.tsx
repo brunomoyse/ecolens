@@ -35,11 +35,11 @@ interface DataTableProps<TData, TValue> {
 }
 
 const displayFilter = (header: any) => {
-    return header === "Forme" || header === "Secteur";
+    return header === "Type d'entité" || header === "Secteur";
 }
 
 const getFilterContent = (header: any) => {
-    if (header === "Forme") {
+    if (header === "Type d'entité") {
         return (
             <RadioGroup defaultValue="all">
                 <div className="flex items-center space-x-2">
@@ -47,12 +47,12 @@ const getFilterContent = (header: any) => {
                     <Label htmlFor="r1">Tous</Label>
                 </div>
                 <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="sa" id="r2"/>
-                    <Label htmlFor="r2">SA</Label>
+                    <RadioGroupItem value="Personne physique" id="r2"/>
+                    <Label htmlFor="r2">Personne physique</Label>
                 </div>
                 <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="srl" id="r3"/>
-                    <Label htmlFor="r3">SRL</Label>
+                    <RadioGroupItem value="Personne morale" id="r3"/>
+                    <Label htmlFor="r3">Personne morale</Label>
                 </div>
             </RadioGroup>
         )
@@ -64,15 +64,15 @@ const getFilterContent = (header: any) => {
                     <Label htmlFor="r1">Tous</Label>
                 </div>
                 <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="primary" id="r2"/>
+                    <RadioGroupItem value="PRIMARY" id="r2"/>
                     <Label htmlFor="r2">Primaire</Label>
                 </div>
                 <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="secondary" id="r3"/>
+                    <RadioGroupItem value="SECONDARY" id="r3"/>
                     <Label htmlFor="r3">Secondaire</Label>
                 </div>
                 <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="secondary" id="r3"/>
+                    <RadioGroupItem value="TERTIARY" id="r3"/>
                     <Label htmlFor="r3">Tertiaire</Label>
                 </div>
             </RadioGroup>
