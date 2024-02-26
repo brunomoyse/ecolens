@@ -42,8 +42,6 @@ export const fetchEnterprises = createAsyncThunk(
                 }
             }
 
-            console.log(queryVariables, 'queryVariables');
-
             const response = await apolloClient.query({
                 query: gql`
                     query ($pageSize: Int, $page: Int, $bbox: [Float!], $wkt: String) {

@@ -23,12 +23,6 @@ const DynamicPagination: React.FC = () => {
     const currentPagination: PaginationType|null = useAppSelector((state) => state.enterprise.enterprisesPagination);
     const drawnFeature = useAppSelector((state) => state.drawing.drawnFeature);
 
-    useEffect(() => {
-        // This effect runs whenever `currentPagination` changes.
-        console.log('Pagination updated:', currentPagination);
-        // You can place additional logic here if needed, e.g., to handle side effects.
-    }, [currentPagination]);
-
     const handlePageChange = (page: number | string) => {
         if (!map || !currentPagination) return;
         if (typeof page === 'string') return; // ... (ellipsis)
