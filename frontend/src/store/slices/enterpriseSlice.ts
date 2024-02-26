@@ -24,7 +24,8 @@ export const fetchEnterprises = createAsyncThunk(
     async (args: any, { rejectWithValue }) => {
         try {
             let queryVariables: any = {
-                first: args.first || 5,
+                page: args.page || 1,
+                pageSize: args.pageSize || 5,
             };
 
             if (args.bbox) {
@@ -40,6 +41,8 @@ export const fetchEnterprises = createAsyncThunk(
                     wkt: args.wkt,
                 }
             }
+
+            console.log(queryVariables, 'queryVariables');
 
             const response = await apolloClient.query({
                 query: gql`
@@ -70,6 +73,7 @@ export const fetchEnterprises = createAsyncThunk(
                 `,
                 variables: queryVariables,
             });
+
             return response.data.enterprises;
         } catch (error) {
             return rejectWithValue(error);
@@ -102,6 +106,7 @@ export const fetchEnterprise = createAsyncThunk(
                     id: args.id,
                 },
             });
+
             return response.data.enterprise;
         } catch (error) {
             return rejectWithValue(error);
@@ -135,20 +140,15 @@ export const enterpriseSlice = createSlice({
         setSelectedEnterprise: (state, action) => {
             state.selectedEnterprise = action.payload;
         },
-        updateCurrentPage: (state, action) => {
-            if (state.enterprisesPagination) {
-                state.enterprisesPagination.currentPage = action.payload;
-            }
-        }
     },
     extraReducers: (builder) => {
         // Handle actions defined by createAsyncThunk or other extraReducers
         builder.addCase(fetchEnterprises.fulfilled, (state, action) => {
-            state.enterprisesData = action.payload.data;
-            state.enterprisesPagination = action.payload.pagination;
+            state.enterprisesData = action.payload.data
+            state.enterprisesPagination = { ...action.payload.pagination };
         });
     },
 });
 
-export const { updateCurrentPage, setSelectedEnterprises, setSelectedEnterprise } = enterpriseSlice.actions;
+export const { setSelectedEnterprises, setSelectedEnterprise } = enterpriseSlice.actions;
 export default enterpriseSlice.reducer;

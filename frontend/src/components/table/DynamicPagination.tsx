@@ -1,8 +1,8 @@
 // DynamicPagination.tsx
-import React from 'react';
+import React, {useEffect} from 'react';
 import {useAppDispatch, useAppSelector} from "@/store/hooks";
 import {Pagination as PaginationType} from "@/types";
-import {updateCurrentPage} from "@/store/slices/enterpriseSlice";
+import {fetchEnterprises} from "@/store/slices/enterpriseSlice";
 
 import {
     Pagination,
@@ -13,17 +13,36 @@ import {
     PaginationNext,
     PaginationPrevious,
 } from "@/components/ui/pagination"
+import {transformExtent} from "ol/proj";
+import {useMap} from "@/context/map-context";
 
 const DynamicPagination: React.FC = () => {
+    const { map } = useMap();
+
     const dispatch = useAppDispatch();
     const currentPagination: PaginationType|null = useAppSelector((state) => state.enterprise.enterprisesPagination);
+    const drawnFeature = useAppSelector((state) => state.drawing.drawnFeature);
+
+    useEffect(() => {
+        // This effect runs whenever `currentPagination` changes.
+        console.log('Pagination updated:', currentPagination);
+        // You can place additional logic here if needed, e.g., to handle side effects.
+    }, [currentPagination]);
 
     const handlePageChange = (page: number | string) => {
-        if (currentPagination && page !== '...' && page !== currentPagination.currentPage) {
-            // Dispatch action to update the current page, which should trigger a re-fetch or update of the displayed data
-            // Replace 'updateCurrentPage' with your actual action creator
-            dispatch(updateCurrentPage(typeof page === 'number' ? page : parseInt(page)));
-        }
+        if (!map || !currentPagination) return;
+        if (typeof page === 'string') return; // ... (ellipsis)
+        if (page === currentPagination.currentPage || currentPagination.firstPage > page || currentPagination.lastPage < page) return;
+            let args: any = { page }
+            if (drawnFeature) {
+                args = { ...args, wkt: drawnFeature };
+                dispatch(fetchEnterprises({ ...args, wkt: drawnFeature }));
+            } else {
+                const currentBbox3857 = map.getView().calculateExtent(map.getSize());
+                const bboxWGS84 = transformExtent(currentBbox3857, 'EPSG:3857', 'EPSG:4326');
+                args = { ...args, bbox: bboxWGS84 };
+            }
+            dispatch(fetchEnterprises({ ...args }))
     };
 
     const generatePageNumbers = (): Array<number | string> => {

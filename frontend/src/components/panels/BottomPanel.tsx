@@ -37,23 +37,25 @@ export default function BottomPanel() {
         setIsPanelOpen(!isPanelOpen); // Toggle panel state
     };
 
-    const fetchData = (args: any) => {
-        if (!map) return;
 
-        if (drawnFeature) {
-            args = { ...args, wkt: drawnFeature };
-            dispatch(fetchEnterprises({ ...args, wkt: drawnFeature }));
-        } else {
-            const currentBbox3857 = map.getView().calculateExtent(map.getSize());
-            const bboxWGS84 = transformExtent(currentBbox3857, 'EPSG:3857', 'EPSG:4326');
-            args = { ...args, bbox: bboxWGS84 };
-        }
-
-        dispatch(fetchEnterprises({ ...args }))
-    };
 
     useEffect(() => {
         if (!map) return;
+
+        const fetchData = (args: any) => {
+            if (!map) return;
+
+            if (drawnFeature) {
+                args = { ...args, wkt: drawnFeature };
+                dispatch(fetchEnterprises({ ...args, wkt: drawnFeature }));
+            } else {
+                const currentBbox3857 = map.getView().calculateExtent(map.getSize());
+                const bboxWGS84 = transformExtent(currentBbox3857, 'EPSG:3857', 'EPSG:4326');
+                args = { ...args, bbox: bboxWGS84 };
+            }
+
+            dispatch(fetchEnterprises({ ...args }))
+        };
 
         const debouncedFetchData = debounce(fetchData, 800);
 
@@ -64,7 +66,7 @@ export default function BottomPanel() {
         return () => {
             map.un('postrender', debouncedFetchData);
         };
-    }, [map, dispatch, drawnFeature, currentPagination, fetchData]);
+    }, [map, dispatch, drawnFeature, currentPagination]);
 
     return (
         <ResizablePanelGroup
