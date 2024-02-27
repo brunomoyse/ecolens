@@ -6,14 +6,16 @@ interface DrawingState {
     isDrawingPolygon: boolean;
     isDrawingCircle: boolean;
     drawnFeature: Polygon | null;
-    drawnCircle: Circle | null
+    drawnCircleRadius: number | null;
+    drawnCircleCenter: [number, number] | null;
 }
 
 const initialState: DrawingState = {
     isDrawingPolygon: false,
     isDrawingCircle: false,
     drawnFeature: null,
-    drawnCircle: null
+    drawnCircleRadius: null,
+    drawnCircleCenter: null,
 };
 
 export const drawingSlice = createSlice({
@@ -29,11 +31,14 @@ export const drawingSlice = createSlice({
         setDrawnFeature: (state, action) => {
             state.drawnFeature = action.payload;
         },
-        setDrawnCircle: (state, action) => {
-            state.drawnCircle = action.payload;
+        setDrawnCircleRadius: (state, action) => {
+            state.drawnCircleRadius = action.payload ? Math.round(action.payload) : null;
+        },
+        setDrawnCircleCenter: (state, action) => {
+            state.drawnCircleCenter = action.payload;
         }
     },
 });
 
-export const { setDrawingPolygonState, setDrawingCircleState, setDrawnFeature, setDrawnCircle } = drawingSlice.actions;
+export const { setDrawingPolygonState, setDrawingCircleState, setDrawnFeature, setDrawnCircleRadius, setDrawnCircleCenter } = drawingSlice.actions;
 export default drawingSlice.reducer;

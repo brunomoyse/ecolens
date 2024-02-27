@@ -5,7 +5,7 @@ import 'ol/ol.css';
 import View from 'ol/View.js';
 import OSM from 'ol/source/OSM.js';
 import TileLayer from 'ol/layer/Tile.js';
-import { useEffect, useState } from 'react';
+import {useEffect, useRef, useState} from 'react';
 import { fromLonLat } from 'ol/proj';
 import { useMap } from "@/context/map-context";
 import { createEmptyVectorLayerForDrawing } from "@/lib/utils";
@@ -14,9 +14,13 @@ import { createGeoJsonLayer } from "./map/GeoJsonLayer";
 import PreviewCard from "@/components/cards/PreviewCard";
 import { Enterprise } from "@/types";
 import { Draw } from "ol/interaction";
-import VectorSource from "ol/source/Vector";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import {setDrawnCircle, setDrawnFeature} from "@/store/slices/drawingSlice";
+import {
+    setDrawingCircleState,
+    setDrawnCircleCenter,
+    setDrawnCircleRadius,
+    setDrawnFeature
+} from "@/store/slices/drawingSlice";
 import { TileArcGISRest } from "ol/source";
 import { setSelectedEnterprises } from "@/store/slices/enterpriseSlice";
 import { setSelectedEap } from "@/store/slices/eapSlice";
@@ -24,7 +28,9 @@ import { WKT } from "ol/format";
 import { fetchGeoPortalLegend } from "@/store/slices/legendSlice";
 import {Type} from "ol/geom/Geometry";
 import { createCircleWkt } from "@/lib/utils";
-import {Circle, Polygon} from "ol/geom";
+import {Circle, Geometry, Polygon} from "ol/geom";
+import { Vector as VectorLayer } from 'ol/layer';
+import { Vector as VectorSource } from 'ol/source';
 
 // Namur's geographic coordinates (WGS84)
 const namurGeoCoords = [4.8717, 50.4670];
@@ -45,6 +51,8 @@ export default function MapComponent() {
     const isDrawingPolygon = useAppSelector((state) => state.drawing.isDrawingPolygon);
     const isDrawingCircle = useAppSelector((state) => state.drawing.isDrawingCircle);
     const drawnFeature = useAppSelector((state) => state.drawing.drawnFeature);
+    const drawnCircleRadius = useAppSelector((state) => state.drawing.drawnCircleRadius);
+    const drawnCircle = useRef<Circle|null>(null);
     const dispatch = useAppDispatch();
 
     const [previewCardInfo, setPreviewCardInfo] = useState<Enterprise[]|null>(null);
@@ -201,11 +209,18 @@ export default function MapComponent() {
                     });
                     dispatch(setDrawnFeature(wktString));
                 } else if (featureGeometry instanceof Circle) {
-                    const radius = featureGeometry.getRadius();
-                    const center = featureGeometry.getCenter();
+                    // Set radius/center in meters for the FE
+                    let radius = featureGeometry.getRadius();
+                    let center = featureGeometry.getCenter();
+                    dispatch(setDrawnCircleCenter(center));
+                    dispatch(setDrawnCircleRadius(radius));
 
-                    // wktString = createCircleWkt(center, radius, 32)
-                    dispatch(setDrawnCircle(featureGeometry));
+                    // Set the local state
+                    drawnCircle.current = featureGeometry;
+
+                    // Transform to WKT for the backend
+                    wktString = createCircleWkt(event.feature, 32)
+                    dispatch(setDrawnFeature(wktString));
                 }
 
                 map.removeInteraction(drawInteraction);
@@ -231,6 +246,34 @@ export default function MapComponent() {
         };
     }, [dispatch, isDrawingPolygon, isDrawingCircle, map]);
 
+    useEffect(() => {
+        if (!map || !drawnCircle.current || !drawnCircleRadius) return;
+
+        // Filter to find the vector layer with title 'Drawing'
+        const vectorLayers = map.getLayers().getArray().filter((layer): layer is VectorLayer<VectorSource> => {
+            return layer instanceof VectorLayer && layer.get('title') === 'Drawing';
+        });
+
+        if (vectorLayers.length > 0) {
+            const vectorLayer = vectorLayers[0];
+            const source = vectorLayer.getSource();
+            const features = source?.getFeatures() ?? [];
+
+            // Find the specific circle feature
+            const circleFeature = features[0];
+
+            if (circleFeature) {
+                const circleGeometry = circleFeature.getGeometry();
+                if (circleGeometry instanceof Circle) {
+                    // Update the circle's radius with the new value from the store
+                    circleGeometry.setRadius(drawnCircleRadius);
+
+                    const wktString = createCircleWkt(circleFeature, 32)
+                    dispatch(setDrawnFeature(wktString));
+                }
+            }
+        }
+    }, [drawnCircleRadius]);
 
     return (
         <div id="map" className="h-screen w-screen">

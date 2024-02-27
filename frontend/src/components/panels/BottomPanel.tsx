@@ -16,6 +16,7 @@ import {PanelBottomOpen, PanelBottomClose} from "lucide-react";
 import {useMap} from "@/context/map-context";
 import {transformExtent} from "ol/proj";
 import {debounce} from "next/dist/server/utils";
+import {setDrawnCircleRadius} from "@/store/slices/drawingSlice";
 
 export default function BottomPanel() {
     const { map } = useMap();
@@ -24,6 +25,7 @@ export default function BottomPanel() {
     const enterprises = useAppSelector((state) => state.enterprise.enterprisesData);
     const currentPagination = useAppSelector((state) => state.enterprise.enterprisesPagination);
     const drawnFeature = useAppSelector((state) => state.drawing.drawnFeature);
+    const drawnCircleRadius = useAppSelector((state) => state.drawing.drawnCircleRadius);
 
     const panelRef = useRef<ImperativePanelHandle>(null);
     const [isPanelOpen, setIsPanelOpen] = useState(true);

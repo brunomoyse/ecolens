@@ -7,6 +7,8 @@ import { TileArcGISRest } from 'ol/source';
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 import { Fill, Stroke, Style } from 'ol/style';
+import {Circle, Geometry} from "ol/geom";
+import {Feature} from "ol";
 
 type UseDraggableProps = {
   elementId: string;
@@ -43,7 +45,13 @@ const createEmptyVectorLayerForDrawing = (vectorSource: VectorSource): VectorLay
   });
 }
 
-const createCircleWkt = (center: number[], angularRadiusInDegrees: number, numPoints: number = 32) => {
+const createCircleWkt = (feature: Feature<Geometry>, numPoints: number = 32) => {
+
+  const circle: Circle = feature.clone().getGeometry() as Circle;
+  circle.transform('EPSG:3857', 'EPSG:4326');
+  const angularRadiusInDegrees = circle.getRadius();
+  const center = circle.getCenter();
+
   const earthRadius = 6371000; // Earth's radius in meters
   const latitudeRadians = center[1] * Math.PI / 180;
   // Convert angular radius in degrees to meters; 1 degree of latitude is approximately 111 km

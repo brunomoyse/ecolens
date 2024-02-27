@@ -3,7 +3,8 @@ import {useAppDispatch, useAppSelector} from "@/store/hooks";
 import {
     setDrawingCircleState,
     setDrawingPolygonState,
-    setDrawnCircle,
+    setDrawnCircleCenter,
+    setDrawnCircleRadius,
     setDrawnFeature
 } from "@/store/slices/drawingSlice";
 import {Eraser, Pencil, Download, CircleDotDashed} from "lucide-react";
@@ -33,7 +34,8 @@ export default function BarButtons() {
         dispatch(setDrawingPolygonState(false));
         dispatch(setDrawingCircleState(false));
         dispatch(setDrawnFeature(null));
-        dispatch(setDrawnCircle(null));
+        dispatch(setDrawnCircleRadius(null));
+        dispatch(setDrawnCircleCenter(null));
         map?.getLayers().forEach((layer) => {
             if (layer.get('title') === 'Drawing') {
                 map.removeLayer(layer);
@@ -74,19 +76,19 @@ export default function BarButtons() {
     return (
         <div className="flex flex-col absolute top-1/4 right-0 z-50 -translate-x-1/2 buttons-bar">
             {/* Circle */}
-            {!drawingState.drawnFeature && !drawingState.drawnCircle && (
+            {!drawingState.drawnFeature && !drawingState.drawnCircleRadius && (
                 <Button onClick={handleSetDrawingCircle} variant="outline" size="icon" className={`h-12 w-12 rounded-full border-2 border-red-600 mb-4 ${drawingState.isDrawingCircle ? 'bg-gray-300' : ''}`}>
                     <CircleDotDashed className="h-6 w-6" />
                 </Button>
             )}
 
             {/* Polygon */}
-            {!drawingState.drawnFeature && !drawingState.drawnCircle && (
+            {!drawingState.drawnFeature && !drawingState.drawnCircleRadius && (
             <Button onClick={handleSetDrawingPolygon} variant="outline" size="icon" className={`h-12 w-12 rounded-full border-2 border-red-600 mb-4 ${drawingState.isDrawingPolygon ? 'bg-gray-300' : ''}`}>
                 <Pencil className="h-6 w-6" />
             </Button>
             )}
-            {(drawingState.drawnFeature || drawingState.drawnCircle) && (
+            {(drawingState.drawnFeature || drawingState.drawnCircleRadius) && (
                 <Button onClick={handleClearDraw} variant="outline" size="icon" className={`h-12 w-12 rounded-full border-2 border-gray-600 mb-4 bg-gray-300`}>
                     <Eraser className="h-6 w-6" />
                 </Button>
