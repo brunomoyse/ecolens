@@ -6,6 +6,7 @@ import apolloClient from "@/lib/apollo-client";
 
 // Define the initial state
 interface EnterpriseState {
+    isEnterpriseLoading: boolean
     enterprisesData: Enterprise[];
     enterprisesPagination: Pagination | null;
     selectedEnterprises: Enterprise[] | null;
@@ -13,6 +14,7 @@ interface EnterpriseState {
 }
 
 const initialState: EnterpriseState = {
+    isEnterpriseLoading: false,
     enterprisesData: [],
     enterprisesPagination: null,
     selectedEnterprises: null,
@@ -141,7 +143,11 @@ export const enterpriseSlice = createSlice({
     },
     extraReducers: (builder) => {
         // Handle actions defined by createAsyncThunk or other extraReducers
+        builder.addCase(fetchEnterprises.pending, (state, action) => {
+            state.isEnterpriseLoading = true
+        });
         builder.addCase(fetchEnterprises.fulfilled, (state, action) => {
+            state.isEnterpriseLoading = false
             state.enterprisesData = action.payload.data
             state.enterprisesPagination = { ...action.payload.pagination };
         });
