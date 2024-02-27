@@ -219,7 +219,7 @@ export default function MapComponent() {
                     drawnCircle.current = featureGeometry;
 
                     // Transform to WKT for the backend
-                    wktString = createCircleWkt(event.feature, 32)
+                    wktString = createCircleWkt(event.feature)
                     dispatch(setDrawnFeature(wktString));
                 }
 
@@ -268,7 +268,7 @@ export default function MapComponent() {
                     // Update the circle's radius with the new value from the store
                     circleGeometry.setRadius(drawnCircleRadius);
 
-                    const wktString = createCircleWkt(circleFeature, 32)
+                    const wktString = createCircleWkt(circleFeature)
                     dispatch(setDrawnFeature(wktString));
                 }
             }

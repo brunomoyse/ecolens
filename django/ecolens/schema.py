@@ -6,11 +6,24 @@ from api.models import Layer, Enterprises
 from django.db.models import Q, F
 from django.db.models.functions import LTrim
 
+# CoordinatesType to encapsulate latitude and longitude
+class CoordinatesType(graphene.ObjectType):
+    latitude = graphene.Float()
+    longitude = graphene.Float()
+
 # Define your DjangoObjectType for Enterprises with excluded "geom" field
 class EnterprisesType(DjangoObjectType):
+    coordinates = graphene.Field(CoordinatesType)
+
     class Meta:
         model = Enterprises
         exclude = ("geom",)
+
+    def resolve_coordinates(self, info):
+        if self.geom:
+            # Transform the geometry to WGS84 and return the coordinates
+            geom_transformed = self.geom.transform(4326, clone=True)
+            return CoordinatesType(latitude=geom_transformed.y, longitude=geom_transformed.x)
 
 # Define your DjangoObjectType for Layer
 class LayerType(DjangoObjectType):

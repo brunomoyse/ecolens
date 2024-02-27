@@ -45,7 +45,7 @@ const createEmptyVectorLayerForDrawing = (vectorSource: VectorSource): VectorLay
   });
 }
 
-const createCircleWkt = (feature: Feature<Geometry>, numPoints: number = 32) => {
+const createCircleWkt = (feature: Feature<Geometry>, numPoints: number = 64) => {
 
   const circle: Circle = feature.clone().getGeometry() as Circle;
   circle.transform('EPSG:3857', 'EPSG:4326');
