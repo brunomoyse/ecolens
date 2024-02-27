@@ -6,6 +6,7 @@ import BarButtons from "@/components/panels/BarButtons";
 import LayerWidget from "@/components/panels/LayerWidget";
 import BottomPanel from "@/components/panels/BottomPanel";
 import SelectedEnterpriseWidget from "@/components/cards/SelectedEnterpriseWidget";
+import CircleInfoCard from "@/components/cards/CircleInfoCard";
 
 export default function Home() {
     return (
@@ -13,6 +14,7 @@ export default function Home() {
             <BarButtons />
             <LayerWidget />
             <SelectedEnterpriseWidget />
+            <CircleInfoCard />
             <BottomPanel />
             <MapComponent />
         </main>

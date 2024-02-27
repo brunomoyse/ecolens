@@ -18,7 +18,6 @@ const getSectorTranslation = (sector: string) => {
 }
 
 export default function SelectedEnterpriseWidget() {
-    const { map, layers, addLayer, removeLayer, toggleLayerVisibility } = useMap();
     useDraggable('selected-enterprise-widget', 'drag-selected-enterprise-widget');
     const dispatch = useAppDispatch();
     const selectedEnterprise = useAppSelector((state) => state.enterprise.selectedEnterprise);

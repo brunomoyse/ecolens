@@ -16,7 +16,7 @@ import { Enterprise } from "@/types";
 import { Draw } from "ol/interaction";
 import VectorSource from "ol/source/Vector";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { setDrawnFeature } from "@/store/slices/drawingSlice";
+import {setDrawnCircle, setDrawnFeature} from "@/store/slices/drawingSlice";
 import { TileArcGISRest } from "ol/source";
 import { setSelectedEnterprises } from "@/store/slices/enterpriseSlice";
 import { setSelectedEap } from "@/store/slices/eapSlice";
@@ -191,7 +191,6 @@ export default function MapComponent() {
                 let wktString = '';
                 const featureCopy = event.feature.clone();
                 const featureGeometry = featureCopy.getGeometry();
-                featureGeometry!.transform('EPSG:3857', 'EPSG:4326');
 
                 if (featureGeometry && featureGeometry instanceof Polygon) {
                     featureGeometry!.transform('EPSG:3857', 'EPSG:4326');
@@ -200,14 +199,15 @@ export default function MapComponent() {
                         dataProjection: 'EPSG:4326',
                         featureProjection: 'EPSG:4326'
                     });
+                    dispatch(setDrawnFeature(wktString));
                 } else if (featureGeometry instanceof Circle) {
                     const radius = featureGeometry.getRadius();
                     const center = featureGeometry.getCenter();
 
-                    wktString = createCircleWkt(center, radius, 32)
+                    // wktString = createCircleWkt(center, radius, 32)
+                    dispatch(setDrawnCircle(featureGeometry));
                 }
 
-                dispatch(setDrawnFeature(wktString));
                 map.removeInteraction(drawInteraction);
             });
         };
