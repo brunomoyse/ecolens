@@ -26,7 +26,8 @@ import {
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 
-import {Filter} from "lucide-react";
+import {Filter, ZoomIn} from "lucide-react";
+import {Enterprise} from "@/types";
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
@@ -34,7 +35,7 @@ interface DataTableProps<TData, TValue> {
 }
 
 const displayFilter = (header: any) => {
-    return header === "Type d'entité" || header === "Secteur";
+    return header === "Type d'entité" || header === "Secteur" || header === "NACE" || header === "PAE";
 }
 
 const getFilterContent = (header: any) => {
@@ -76,6 +77,20 @@ const getFilterContent = (header: any) => {
                 </div>
             </RadioGroup>
         )
+    } else if (header === 'NACE') {
+        return (
+            <div>
+                <Label htmlFor="nace" className="text-sm">Rechercher un NACE</Label>
+                <input placeholder="1234" type="number" id="nace" className="w-full rounded-md border border-gray-300 px-2 py-1"/>
+            </div>
+        )
+    } else if (header === 'PAE') {
+        return (
+            <div>
+                <Label htmlFor="eap" className="text-sm">Rechercher un PAE</Label>
+                <input placeholder="Martinroux" type="text" id="eap" className="w-full rounded-md border border-gray-300 px-2 py-1"/>
+            </div>
+        )
     } else return '';
 }
 
@@ -88,6 +103,11 @@ const getTranslationSector = (cell: Cell<any, any>) => {
     } else if (cellValue === 'TERTIARY') {
         return 'Tertiaire';
     } else return flexRender(cell.column.columnDef.cell, cell.getContext());
+}
+
+const handleZoomInClick = (record: any) => {
+    const enterprise = record as Enterprise;
+    console.log('enterpriseId', enterprise.id);
 }
 
 export function DataTable<TData, TValue>({
@@ -145,8 +165,17 @@ export function DataTable<TData, TValue>({
                             >
                                 {row.getVisibleCells().map((cell) => (
                                     <TableCell key={cell.id} className="border-red-600">
-                                        {  }
                                         { getTranslationSector(cell) }
+                                        {cell.getContext()?.column.id === 'actions' ?
+                                            <div className="flex justify-center">
+                                                <button
+                                                    className="p-2 bg-gray-200 rounded-full"
+                                                    onClick={() => handleZoomInClick(row.original)}
+                                                >
+                                                    <ZoomIn />
+                                                </button>
+                                            </div> : null
+                                        }
                                     </TableCell>
                                 ))}
                             </TableRow>

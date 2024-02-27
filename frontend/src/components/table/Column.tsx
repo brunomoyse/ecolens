@@ -14,7 +14,7 @@ export const columns: ColumnDef<Enterprise>[] = [
     },
     {
         accessorKey: "establishmentNumber",
-        header: "Unité d'établissement",
+        header: "Unité d'étab.",
     },
     {
         accessorKey: "form",
@@ -26,10 +26,18 @@ export const columns: ColumnDef<Enterprise>[] = [
     },
     {
         accessorKey: "naceMain",
-        header: "Nace principal",
+        header: "NACE",
     },
     {
         accessorKey: "naceOther",
-        header: "Nace (autres)",
+        header: "NACE (autres)",
+    },
+    {
+        accessorKey: "eap.name",
+        header: "PAE",
+    },
+    {
+        accessorKey: "actions",
+        header: "Actions",
     },
 ]
