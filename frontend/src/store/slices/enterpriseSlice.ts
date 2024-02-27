@@ -65,6 +65,10 @@ export const fetchEnterprises = createAsyncThunk(
                                 naceMain
                                 naceOther
                                 reliabilityIndex
+                                coordinates {
+                                    longitude
+                                    latitude
+                                }
                                 __typename
                             }
 

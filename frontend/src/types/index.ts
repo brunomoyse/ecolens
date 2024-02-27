@@ -28,6 +28,11 @@ interface legendArcGisLayerLegend {
     values: string[]
 }
 
+interface Coordinates {
+    latitude: number,
+    longitude: number
+}
+
 interface Enterprise {
     id: string,
     establishment_number: string,
@@ -45,6 +50,7 @@ interface Enterprise {
     address: Address|null,
     eap_id: string|null,
     eap: EconomicalActivityPark|null,
+    coordinates: Coordinates
 }
 
 interface Address {

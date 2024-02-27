@@ -26,8 +26,23 @@ import {
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 
+import { Vector as VectorLayer } from 'ol/layer';
+import { Vector as VectorSource } from 'ol/source';
+
 import {Filter, ZoomIn} from "lucide-react";
 import {Enterprise} from "@/types";
+import {Extent} from "ol/extent";
+import {useMap} from "@/context/map-context";
+import {Geometry} from "ol/geom";
+import {Feature} from "ol";
+import Map from "ol/Map";
+import {fromLonLat} from "ol/proj";
+
+interface ZoomToFeatureProps {
+    map: Map | null;
+    latitude: number;
+    longitude: number;
+}
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
@@ -105,21 +120,42 @@ const getTranslationSector = (cell: Cell<any, any>) => {
     } else return flexRender(cell.column.columnDef.cell, cell.getContext());
 }
 
-const handleZoomInClick = (record: any) => {
-    const enterprise = record as Enterprise;
-    console.log('enterpriseId', enterprise.id);
-}
+const zoomToFeatureOnClick = (map: any, record: any) => {
+    if (!map || !record || !record.coordinates) return;
+
+    // Extract the latitude and longitude from the record
+    const { latitude, longitude } = record.coordinates;
+
+    // Ensure the coordinates are numbers before proceeding
+    if (typeof latitude !== 'number' || typeof longitude !== 'number') {
+        console.error('Invalid coordinates');
+        return;
+    }
+
+    // Convert the feature's WGS84 coordinates to the map's projection (EPSG:3857)
+    const featureCoordinates = fromLonLat([longitude, latitude]);
+
+    // Setting the view to the feature's coordinates with some options
+    map.getView().animate({
+        center: featureCoordinates,
+        zoom: 21,
+        duration: 1000
+    });
+};
 
 export function DataTable<TData, TValue>({
                                              columns,
                                              data,
                                          }: DataTableProps<TData, TValue>) {
+    const { map } = useMap();
 
     const table = useReactTable({
         data,
         columns,
         getCoreRowModel: getCoreRowModel(),
     })
+
+    if (!map) return null;
 
     return (
         <div className="rounded-md border">
@@ -170,7 +206,7 @@ export function DataTable<TData, TValue>({
                                             <div className="flex justify-center">
                                                 <button
                                                     className="p-2 bg-gray-200 rounded-full"
-                                                    onClick={() => handleZoomInClick(row.original)}
+                                                    onClick={() => zoomToFeatureOnClick(map, row.original)}
                                                 >
                                                     <ZoomIn />
                                                 </button>
