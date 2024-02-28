@@ -1,3 +1,5 @@
+# models.py
+
 from django.contrib.postgres.fields import ArrayField
 from django.contrib.gis.db import models
 
@@ -43,6 +45,16 @@ class View(models.Model):
     zoom_level = models.IntegerField(default=10)
     is_default = models.BooleanField(default=False)
 
+class EconomicalActivityPark(models.Model):
+    id = models.UUIDField(primary_key=True)
+    name = models.TextField(blank=True, null=True, db_column="LIBELLE")
+
+    class Meta:
+        managed = False
+        db_table = 'pre_geoportail'
+
+    def __str__(self):
+        return self.name
 
 class Enterprises(models.Model):
     """Final enterprises (displayed on the map)"""
@@ -73,11 +85,12 @@ class Enterprises(models.Model):
     website = models.TextField(blank=True, null=True)
     email = models.TextField(blank=True, null=True)
     phone = models.TextField(blank=True, null=True)
-    eap_id = models.UUIDField(blank=True, null=True)
     reliability_index = models.IntegerField(blank=True, null=True)
     capakey = models.TextField(blank=True, null=True)
     extra_properties = models.JSONField(blank=True, null=True)
     geom = models.GeometryField(blank=True, srid=31370)
+    # Linked objects
+    eap = models.ForeignKey('EconomicalActivityPark', on_delete=models.CASCADE, db_column='eap_id', related_name='enterprises')
 
     class Meta:
         managed = False
