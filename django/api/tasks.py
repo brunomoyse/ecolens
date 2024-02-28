@@ -17,7 +17,7 @@ from django.utils import timezone
 logging.basicConfig(level=logging.INFO)
 
 
-def check_compatible_columns(update_id: int, df: pd.DataFrame):
+def check_compatible_columns(source_id: int, df: pd.DataFrame, subfile: str = None):
     """
     Check that the columns (shape) of the new downloaded data are
     compatible with the previous data store in the db. The idea
@@ -26,9 +26,14 @@ def check_compatible_columns(update_id: int, df: pd.DataFrame):
 
     This function will the columns of the df for checking it next
     time
+
+    subfile: used when we import zipped shp files, we can have more than one
     """
-    if os.path.exists(f"{settings.DB_SHAPE_DIR}/{update_id}.pkl"):
-        with open(f"{settings.DB_SHAPE_DIR}/{update_id}.pkl", "rb") as file:
+    previous_columns_file = f"{settings.DB_SHAPE_DIR}/{source_id}.pkl"
+    if subfile:
+        previous_columns_file = f"{settings.DB_SHAPE_DIR}/{source_id}_{subfile}.pkl"
+    if os.path.exists(previous_columns_file):
+        with open(previous_columns_file, "rb") as file:
             previous_columns = pickle.load(file)
 
             if not previous_columns.isin(df.columns).all():
@@ -39,7 +44,7 @@ def check_compatible_columns(update_id: int, df: pd.DataFrame):
         os.makedirs(settings.DB_SHAPE_DIR)
 
     # save the file for the next analysis
-    with open(f"{settings.DB_SHAPE_DIR}/{update_id}.pkl", "wb") as file:
+    with open(previous_columns_file, "wb") as file:
         pickle.dump(df.columns, file)
 
     return True
@@ -63,7 +68,7 @@ def download_json_and_save_to_db(update_id: int):
             temp_file = urlretrieve(source.url)
             gdf = gpd.read_file(temp_file[0])
 
-            if check_compatible_columns(update_id, gdf):
+            if check_compatible_columns(source.id, gdf):
                 gdf.to_postgis(
                     source.table,
                     db_engine,
@@ -94,8 +99,13 @@ def download_json_and_save_to_db(update_id: int):
                 if os.path.exists(f"{extract_folder}/{shp_to_import}"):
                     filepath = f"{extract_folder}/{shp_to_import}"
                     gdf = gpd.read_file(filepath)
-                    gdf.to_postgis(table_to_fill, db_engine, if_exists='replace', index=False, schema=source.schema)
-                    update.status = update.Status.SUCCESS
+
+                    if check_compatible_columns(source.id, gdf, table_to_fill):
+                        gdf.to_postgis(table_to_fill, db_engine, if_exists='replace', index=False, schema=source.schema)
+                        update.status = update.Status.SUCCESS
+                    else:
+                        update.status = update.Status.FAIL
+                        update.message = f"File {shp_to_import} compatible with the db"
                 else:
                     raise Exception(f"File {shp_to_import} not found in the zip")
 
