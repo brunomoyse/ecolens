@@ -69,6 +69,9 @@ export const fetchEnterprises = createAsyncThunk(
                                     longitude
                                     latitude
                                 }
+                                economicalActivityPark {
+                                    name
+                                }
                                 __typename
                             }
 

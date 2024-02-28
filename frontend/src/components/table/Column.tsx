@@ -33,7 +33,7 @@ export const columns: ColumnDef<Enterprise>[] = [
         header: "NACE (autres)",
     },
     {
-        accessorKey: "eap.name",
+        accessorKey: "economicalActivityPark.name",
         header: "PAE",
     },
     {
