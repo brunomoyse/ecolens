@@ -16,7 +16,7 @@ import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 DB_SHAPE_DIR = os.path.join(BASE_DIR, "db_shape")
-
+DB_ZIP_DIR = os.path.join(BASE_DIR, "db_zip")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/

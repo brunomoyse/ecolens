@@ -22,13 +22,15 @@ class InputSourceUpdate(models.Model):
 class InputSource(models.Model):
     class Types(models.TextChoices):
         GEOJSON = "json", "Geojson"
+        SHAPEFILEZ = "shpz", "ShapefileZipped" # a zipped shapefile
 
     type = models.CharField(max_length=4, choices=Types.choices, default=Types.GEOJSON)
 
     name = models.CharField(max_length=255)
     url = models.URLField(max_length=255)
     schema = models.CharField(max_length=255)
-    table = models.CharField(max_length=255)
+    table = models.CharField(max_length=255)  # for a shp can have more than one
+    filenames = models.CharField(max_length=255)
 
     def last_update(self):
         last_update = self.inputsourceupdate_set.order_by("-start_time").first()
