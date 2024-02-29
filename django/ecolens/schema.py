@@ -17,7 +17,13 @@ class CoordinatesType(graphene.ObjectType):
 class EconomicalActivityParkType(DjangoObjectType):
     class Meta:
         model = EconomicalActivityPark
-        fields = "__all__"
+        fields = ("id", "name")
+
+    def resolve_geom(self, info):
+        if not self.geom:
+            return None
+        # Convert the geometry to GeoJSON format
+        return {"type": self.geom.geom_type, "coordinates": self.geom.coords}
 
 # Enterprises with excluded "geom" field
 class EnterprisesType(DjangoObjectType):
@@ -40,6 +46,10 @@ class EnterprisesType(DjangoObjectType):
             return self.eap
         return None
 
+class DetailedSearchResponseType(graphene.ObjectType):
+    enterprises = graphene.List(EnterprisesType)
+    eaps = graphene.List(EconomicalActivityParkType)
+    #wallonia_plots = graphene.List(WalloniaPlotsType)  # Replace with actual type
 
 # Layer
 class LayerType(DjangoObjectType):
@@ -79,6 +89,39 @@ class Query(graphene.ObjectType):
         sector=graphene.Argument(SectorEnum),
         naceMain=graphene.List(graphene.String),
     )
+    resolver_detail_search = graphene.Field(
+        DetailedSearchResponseType,
+        wkt=graphene.String(required=True),
+    )
+
+    def resolve_resolver_detail_search(self, info, wkt):
+        # Convert the input WKT to a GEOSGeometry object
+        wkt_geom = GEOSGeometry(wkt, srid=4326)  # Assuming input WKT is in WGS84
+
+        # For tables in Lambert 72 (EPSG:31370), transform the geometry
+        wkt_geom_31370 = wkt_geom.transform(31370, clone=True)
+
+        # Query for enterprises within the polygon (assuming Lambert 72 projection)
+        enterprises = Enterprises.objects.filter(
+            geom__within=wkt_geom_31370
+        )
+
+        # Query for pre_geoportail within the polygon (assuming it's in WGS84)
+        eaps = EconomicalActivityPark.objects.filter(
+            geom__intersects=wkt_geom
+        )
+
+        # Query for wallonia_plots within the polygon (assuming Lambert 72 projection)
+        #wallonia_plots = WalloniaPlots.objects.filter(
+        #    geom__within=wkt_geom_31370
+        #)
+
+        # Construct and return the detailed search response
+        return DetailedSearchResponseType(
+            enterprises=list(enterprises),
+            eaps=list(eaps),
+            #wallonia_plots=list(wallonia_plots)
+        )
 
     # Resolver for all_layers
     def resolve_all_layers(self, info):
@@ -90,6 +133,8 @@ class Query(graphene.ObjectType):
             return Layer.objects.get(pk=id)
         except Layer.DoesNotExist:
             return None
+
+
 
     # Resolver for enterprises with simplified pagination and filters
     def resolve_enterprises(

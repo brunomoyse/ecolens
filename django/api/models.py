@@ -50,6 +50,7 @@ class View(models.Model):
 class EconomicalActivityPark(models.Model):
     id = models.UUIDField(primary_key=True)
     name = models.TextField(blank=True, null=True, db_column="LIBELLE")
+    geom = models.GeometryField(blank=True, srid=4326, db_column="geometry")
 
     class Meta:
         managed = False
