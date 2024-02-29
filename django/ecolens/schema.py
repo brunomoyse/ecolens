@@ -39,6 +39,7 @@ class EconomicalActivityParkType(DjangoObjectType):
 
 # Enterprises with excluded "geom" field
 class EnterprisesType(DjangoObjectType):
+    distance_to_centroid = graphene.Int()
     coordinates = graphene.Field(CoordinatesType)
     economical_activity_park = graphene.Field(EconomicalActivityParkType)
 
@@ -57,6 +58,10 @@ class EnterprisesType(DjangoObjectType):
         if hasattr(self, 'eap') and self.eap:
             return self.eap
         return None
+
+    def resolve_distance_to_centroid(self, info):
+        # Since distance_to_centroid is manually set in the resolver function, just return it
+        return self.distance_to_centroid
 
 class DetailedSearchResponseType(graphene.ObjectType):
     enterprises = graphene.List(EnterprisesType)
@@ -114,7 +119,11 @@ class Query(graphene.ObjectType):
         wkt_geom_31370 = wkt_geom.transform(31370, clone=True)
 
         # Filter for enterprises within the polygon (assuming Lambert 72 projection)
-        enterprises = Enterprises.objects.filter(geom__within=wkt_geom_31370)
+        enterprises = Enterprises.objects.filter(
+            geom__within=wkt_geom_31370
+        ).annotate(
+            distance_to_centroid=Distance('geom', wkt_geom_31370.centroid)
+        ).order_by('distance_to_centroid')
 
         # Filter for EconomicalActivityPark intersecting the polygon (assuming it's in WGS84)
         eaps = EconomicalActivityPark.objects.filter(
@@ -131,24 +140,30 @@ class Query(graphene.ObjectType):
         ).order_by('distance_to_centroid')
 
         # Convert the QuerySet to a list to evaluate the annotations
+        enterprises_list = list(enterprises)
         eaps_list = list(eaps)
         wallonia_plots_list = list(wallonia_plots)
 
         # Ensure distance_to_centroid is converted to a float (meters in this example)
-        for plot in wallonia_plots_list:
-            if hasattr(plot, 'distance_to_centroid') and plot.distance_to_centroid is not None:
-                plot.distance_to_centroid = round(plot.distance_to_centroid.m)
+        for enterprise in enterprises_list:
+            if hasattr(enterprise, 'distance_to_centroid') and enterprise.distance_to_centroid is not None:
+                enterprise.distance_to_centroid = round(enterprise.distance_to_centroid.m)
             else:
-                plot.distance_to_centroid = None
+                enterprise.distance_to_centroid = None
         for eap in eaps_list:
             if hasattr(eap, 'distance_to_centroid') and eap.distance_to_centroid is not None:
                 eap.distance_to_centroid = round(eap.distance_to_centroid.m)
             else:
                 eap.distance_to_centroid = None
+        for plot in wallonia_plots_list:
+            if hasattr(plot, 'distance_to_centroid') and plot.distance_to_centroid is not None:
+                plot.distance_to_centroid = round(plot.distance_to_centroid.m)
+            else:
+                plot.distance_to_centroid = None
 
         # Construct and return the detailed search response
         return DetailedSearchResponseType(
-            enterprises=list(enterprises),
+            enterprises=list(enterprises_list),
             eaps=list(eaps_list),
             plots=list(wallonia_plots_list)
         )

@@ -93,8 +93,14 @@ class Enterprises(models.Model):
     extra_properties = models.JSONField(blank=True, null=True)
     geom = models.GeometryField(blank=True, srid=31370)
     # Linked objects
-    eap = models.ForeignKey('EconomicalActivityPark', on_delete=models.CASCADE, db_column='eap_id', related_name='enterprises')
-
+    eap = models.ForeignKey(
+    'EconomicalActivityPark',
+        on_delete=models.CASCADE,
+        db_column='eap_id',
+        related_name='enterprises',
+        null=True,  # Allow the foreign key to be null
+        blank=True  # Allow the field to be blank in forms and admin
+    )
     class Meta:
         managed = False
         db_table = "enterprises"
