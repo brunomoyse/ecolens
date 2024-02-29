@@ -22,7 +22,7 @@ import {
     setDrawnFeature
 } from "@/store/slices/drawingSlice";
 import { TileArcGISRest } from "ol/source";
-import { setSelectedEnterprises } from "@/store/slices/enterpriseSlice";
+import {fetchCircleSearchResults, setSelectedEnterprises} from "@/store/slices/enterpriseSlice";
 import { setSelectedEap } from "@/store/slices/eapSlice";
 import { WKT } from "ol/format";
 import { fetchGeoPortalLegend } from "@/store/slices/legendSlice";
@@ -220,6 +220,7 @@ export default function MapComponent() {
 
                     // Transform to WKT for the backend
                     wktString = createCircleWkt(event.feature)
+                    dispatch(fetchCircleSearchResults({wkt: wktString}));
                     dispatch(setDrawnFeature(wktString));
                 }
 

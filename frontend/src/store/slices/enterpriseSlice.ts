@@ -1,8 +1,14 @@
 // Import createAsyncThunk
 import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
-import {Enterprise, Pagination} from '@/types';
+import {EconomicalActivityPark, Enterprise, Pagination} from '@/types';
 import gql from "graphql-tag";
 import apolloClient from "@/lib/apollo-client";
+
+interface circleSearchResultsType {
+    enterprises: Enterprise[];
+    eaps: EconomicalActivityPark[];
+    plots: any;
+}
 
 // Define the initial state
 interface EnterpriseState {
@@ -11,6 +17,7 @@ interface EnterpriseState {
     enterprisesPagination: Pagination | null;
     selectedEnterprises: Enterprise[] | null;
     selectedEnterprise: Enterprise | null;
+    circleSearchResults: circleSearchResultsType | null;
 }
 
 const initialState: EnterpriseState = {
@@ -19,6 +26,7 @@ const initialState: EnterpriseState = {
     enterprisesPagination: null,
     selectedEnterprises: null,
     selectedEnterprise: null,
+    circleSearchResults: null,
 };
 
 export const fetchEnterprises = createAsyncThunk(
@@ -121,6 +129,45 @@ export const fetchEnterprise = createAsyncThunk(
     }
 );
 
+export const fetchCircleSearchResults = createAsyncThunk(
+    'enterprise/fetchCircleSearchResults',
+    async (args: any, { rejectWithValue }) => {
+        try {
+            if (args.wkt === null) return;
+
+            let queryVariables: any = {
+                wkt: args.wkt,
+            };
+
+            const response = await apolloClient.query({
+                query: gql`
+                    query ($wkt: String!) {
+                        resolverDetailSearch(wkt: $wkt) {
+                            enterprises {
+                                name
+                                distanceToCentroid
+                            }
+                            eaps {
+                                name
+                                distanceToCentroid
+                            }
+                            plots {
+                                capakey
+                                distanceToCentroid
+                            }
+                        }
+                    }
+                `,
+                variables: queryVariables,
+            });
+
+            return response.data.resolverDetailSearch;
+        } catch (error) {
+            return rejectWithValue(error);
+        }
+    }
+);
+
 export const enterpriseSlice = createSlice({
     name: 'enterprise',
     initialState,
@@ -157,6 +204,9 @@ export const enterpriseSlice = createSlice({
             state.isEnterpriseLoading = false
             state.enterprisesData = action.payload.data
             state.enterprisesPagination = { ...action.payload.pagination };
+        });
+        builder.addCase(fetchCircleSearchResults.fulfilled, (state, action) => {
+            state.circleSearchResults = action.payload
         });
     },
 });

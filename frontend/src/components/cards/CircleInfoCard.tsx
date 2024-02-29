@@ -1,16 +1,20 @@
 import {useMap} from "@/context/map-context";
 import {useAppDispatch, useAppSelector} from "@/store/hooks";
 import { Search } from "lucide-react";
-import {useDraggable} from "@/lib/utils";
+import {createCircleWkt, useDraggable} from "@/lib/utils";
 import { Input } from "@/components/ui/input"
 import {Label} from "@/components/ui/label";
 import {Button} from "@/components/ui/button";
 import {setDrawnCircleRadius} from "@/store/slices/drawingSlice";
+import {fetchCircleSearchResults} from "@/store/slices/enterpriseSlice";
+import {Circle, Geometry} from "ol/geom";
+import {Feature} from "ol";
 
 export default function CircleInfoCard() {
     useDraggable('circle-info-card', 'drag-circle-info-card');
     const dispatch = useAppDispatch();
 
+    const circleSearchResults = useAppSelector((state) => state.enterprise.circleSearchResults);
     const drawnCircleCenter = useAppSelector((state) => state.drawing.drawnCircleCenter);
     const drawnCircleRadius = useAppSelector((state) => state.drawing.drawnCircleRadius);
     if (!(drawnCircleRadius && drawnCircleCenter)) return;
@@ -20,7 +24,16 @@ export default function CircleInfoCard() {
         // Convert input value to a number and dispatch the action
         const newRadius = Number(event.target.value);
         dispatch(setDrawnCircleRadius(newRadius));
+
+        // Create a Feature<Geometry> and add the Circle in it
+        const feature = new Feature<Geometry>(new Circle(drawnCircleCenter, newRadius));
+        const wktString = createCircleWkt(feature);
+
+        dispatch(fetchCircleSearchResults({wkt: wktString}));
+
     };
+
+    console.log('circleSearchResults', circleSearchResults)
 
     return (
         <aside id="circle-info-card" className="absolute z-20 right-24 top-12 bg-gray-200 rounded-3xl shadow-lg overflow-hidden">
@@ -39,11 +52,11 @@ export default function CircleInfoCard() {
                 </div>
 
                 <ul className="list-disc space-y-2">
-                    <li><strong>PAE:</strong> 1</li>
-                    <li><strong>Entreprises:</strong> 1</li>
-                    <li><strong>Emplois:</strong> 1</li>
-                    <li><strong>Parcelles:</strong> 1</li>
-                    <li><strong>Parcelles inoccupées:</strong> 1</li>
+                    <li><strong>PAE:</strong> {circleSearchResults && circleSearchResults.eaps ? circleSearchResults.eaps.length : 0 }</li>
+                    <li><strong>Entreprises: </strong> {circleSearchResults && circleSearchResults.enterprises ? circleSearchResults.enterprises.length : 0 }</li>
+                    <li><strong>Emplois:</strong> à calculer</li>
+                    <li><strong>Parcelles:</strong> {circleSearchResults && circleSearchResults.plots ? circleSearchResults.plots.length : 0 }</li>
+                    <li><strong>Parcelles inoccupées:</strong> à calculer</li>
                 </ul>
 
                 <Button size="sm" className="w-full mt-4 uppercase">Exporter détail</Button>

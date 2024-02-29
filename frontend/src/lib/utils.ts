@@ -9,6 +9,11 @@ import VectorSource from 'ol/source/Vector';
 import { Fill, Stroke, Style } from 'ol/style';
 import {Circle, Geometry} from "ol/geom";
 import {Feature} from "ol";
+import {fromCircle} from 'ol/geom/Polygon';
+import Polygon from 'ol/geom/Polygon';
+import {WKT} from "ol/format";
+
+
 
 type UseDraggableProps = {
   elementId: string;
@@ -47,37 +52,16 @@ const createEmptyVectorLayerForDrawing = (vectorSource: VectorSource): VectorLay
 
 const createCircleWkt = (feature: Feature<Geometry>, numPoints: number = 64) => {
 
-  const circle: Circle = feature.clone().getGeometry() as Circle;
-  circle.transform('EPSG:3857', 'EPSG:4326');
-  const angularRadiusInDegrees = circle.getRadius();
-  const center = circle.getCenter();
+  const circleFeature = feature.clone();
+  const circleGeometry = circleFeature.getGeometry() as Circle;
 
-  const earthRadius = 6371000; // Earth's radius in meters
-  const latitudeRadians = center[1] * Math.PI / 180;
-  // Convert angular radius in degrees to meters; 1 degree of latitude is approximately 111 km
-  const angularRadiusInMeters = angularRadiusInDegrees * 111000; // Rough approximation
-  const coordinates = [];
-  const angleStep = (Math.PI * 2) / numPoints;
+  const polygon: Polygon = fromCircle(circleGeometry, 64); // 64 sides approximation
+  const transformedPolygon: Polygon = polygon.clone().transform('EPSG:3857', 'EPSG:4326');
 
-  for (let i = 0; i < numPoints; i++) {
-    const angle = i * angleStep;
-    // Approximate conversion of radius from meters to degrees
-    const dx = angularRadiusInMeters * Math.cos(angle);
-    const dy = angularRadiusInMeters * Math.sin(angle);
-    // Convert offsets in meters back to degrees for latitude and longitude
-    const deltaLongitude = dx / (earthRadius * Math.cos(latitudeRadians)) * (180 / Math.PI);
-    const deltaLatitude = dy / earthRadius * (180 / Math.PI);
-    const longitude = center[0] + deltaLongitude;
-    const latitude = center[1] + deltaLatitude;
-    coordinates.push([longitude.toFixed(6), latitude.toFixed(6)]);
-  }
+  // Prepare the polygon for sending to the backend by converting it to WKT
+  const format = new WKT();
 
-  // Close the polygon by repeating the first coordinate
-  coordinates.push(coordinates[0]);
-
-  // Convert coordinates to WKT
-  const wkt = "POLYGON((" + coordinates.map(coord => coord.join(" ")).join(", ") + "))";
-  return wkt;
+  return format.writeGeometry(transformedPolygon);
 };
 
 

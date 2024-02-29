@@ -1,6 +1,5 @@
-import { createSlice } from '@reduxjs/toolkit';
+import {createSlice} from '@reduxjs/toolkit';
 import {Polygon} from "ol/geom";
-import {Circle} from "ol/geom";
 
 interface DrawingState {
     isDrawingPolygon: boolean;
@@ -32,7 +31,7 @@ export const drawingSlice = createSlice({
             state.drawnFeature = action.payload;
         },
         setDrawnCircleRadius: (state, action) => {
-            state.drawnCircleRadius = action.payload ? Math.round(action.payload) : null;
+            state.drawnCircleRadius = action.payload === null ? null : Math.round(action.payload);
         },
         setDrawnCircleCenter: (state, action) => {
             state.drawnCircleCenter = action.payload;
