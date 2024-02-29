@@ -130,3 +130,12 @@ class AddressEnterprise(models.Model):
     class Meta:
         managed = False
         db_table = "address_enterprise"
+
+class WalloniaPlots(models.Model):
+    capakey = models.TextField(primary_key=True)
+    geom = models.GeometryField(blank=True, srid=31370, db_column="geometry")
+
+    class Meta:
+        managed = False
+        db_table = '"plots"."wallonia"'
+

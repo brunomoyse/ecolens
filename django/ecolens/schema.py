@@ -4,14 +4,27 @@ import json
 import graphene
 from graphene_django import DjangoObjectType
 from django.contrib.gis.geos import Polygon, GEOSGeometry
-from api.models import Layer, Enterprises, EconomicalActivityPark
-from django.db.models import Q, F
-from django.db.models.functions import LTrim
+from api.models import Layer, Enterprises, EconomicalActivityPark, WalloniaPlots
+from django.db.models import Q, F, IntegerField
+from django.db.models.functions import LTrim, Cast
+from django.contrib.gis.db.models.functions import Distance
 
 # CoordinatesType to encapsulate latitude and longitude
 class CoordinatesType(graphene.ObjectType):
     latitude = graphene.Float()
     longitude = graphene.Float()
+
+class WalloniaPlotsType(DjangoObjectType):
+    distance_to_centroid = graphene.Int()
+
+    class Meta:
+        model = WalloniaPlots
+        fields = ("capakey", "distance_to_centroid")
+
+    def resolve_distance_to_centroid(self, info):
+        # Since distance_to_centroid is manually set in the resolver function, just return it
+        return self.distance_to_centroid
+
 
 # EAP
 class EconomicalActivityParkType(DjangoObjectType):
@@ -49,7 +62,7 @@ class EnterprisesType(DjangoObjectType):
 class DetailedSearchResponseType(graphene.ObjectType):
     enterprises = graphene.List(EnterprisesType)
     eaps = graphene.List(EconomicalActivityParkType)
-    #wallonia_plots = graphene.List(WalloniaPlotsType)  # Replace with actual type
+    plots = graphene.List(WalloniaPlotsType)
 
 # Layer
 class LayerType(DjangoObjectType):
@@ -101,26 +114,39 @@ class Query(graphene.ObjectType):
         # For tables in Lambert 72 (EPSG:31370), transform the geometry
         wkt_geom_31370 = wkt_geom.transform(31370, clone=True)
 
-        # Query for enterprises within the polygon (assuming Lambert 72 projection)
-        enterprises = Enterprises.objects.filter(
-            geom__within=wkt_geom_31370
-        )
 
-        # Query for pre_geoportail within the polygon (assuming it's in WGS84)
-        eaps = EconomicalActivityPark.objects.filter(
-            geom__intersects=wkt_geom
-        )
+        # Get the centroid of the polygon to use in the distance calculation
+        centroid_4326 = wkt_geom.centroid
+        centroid_31370 = wkt_geom_31370.centroid
 
-        # Query for wallonia_plots within the polygon (assuming Lambert 72 projection)
-        #wallonia_plots = WalloniaPlots.objects.filter(
-        #    geom__within=wkt_geom_31370
-        #)
+        # Filter for enterprises within the polygon (assuming Lambert 72 projection)
+        enterprises = Enterprises.objects.filter(geom__within=wkt_geom_31370)
+
+        # Filter for EconomicalActivityPark intersecting the polygon (assuming it's in WGS84)
+        eaps = EconomicalActivityPark.objects.filter(geom__intersects=wkt_geom)
+
+        # Filter for wallonia_plots intersecting the polygon and calculate distances (assuming Lambert 72 projection)
+        wallonia_plots = WalloniaPlots.objects.filter(
+            geom__intersects=wkt_geom_31370
+        ).annotate(
+            distance_to_centroid=Distance('geom', wkt_geom_31370.centroid)
+        ).order_by('distance_to_centroid')
+
+        # Convert the QuerySet to a list to evaluate the annotations
+        wallonia_plots_list = list(wallonia_plots)
+
+        # Ensure distance_to_centroid is converted to a float (meters in this example)
+        for plot in wallonia_plots_list:
+            if hasattr(plot, 'distance_to_centroid') and plot.distance_to_centroid is not None:
+                plot.distance_to_centroid = round(plot.distance_to_centroid.m)
+            else:
+                plot.distance_to_centroid = None
 
         # Construct and return the detailed search response
         return DetailedSearchResponseType(
             enterprises=list(enterprises),
             eaps=list(eaps),
-            #wallonia_plots=list(wallonia_plots)
+            plots=list(wallonia_plots_list)
         )
 
     # Resolver for all_layers
@@ -133,8 +159,6 @@ class Query(graphene.ObjectType):
             return Layer.objects.get(pk=id)
         except Layer.DoesNotExist:
             return None
-
-
 
     # Resolver for enterprises with simplified pagination and filters
     def resolve_enterprises(
