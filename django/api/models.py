@@ -98,9 +98,10 @@ class Enterprises(models.Model):
         on_delete=models.CASCADE,
         db_column='eap_id',
         related_name='enterprises',
-        null=True,  # Allow the foreign key to be null
-        blank=True  # Allow the field to be blank in forms and admin
+        null=True,
+        blank=True
     )
+
     class Meta:
         managed = False
         db_table = "enterprises"
