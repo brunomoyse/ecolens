@@ -5,7 +5,7 @@ import {useAppDispatch, useAppSelector} from "@/store/hooks";
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
 import {Enterprise} from "@/types";
-import {setSelectedEnterprise} from "@/store/slices/enterpriseSlice";
+import {fetchEnterprise, setSelectedEnterprise} from "@/store/slices/enterpriseSlice";
 import {setSelectedEnterprises} from "@/store/slices/enterpriseSlice";
 
 interface PreviewCardMapProps {
@@ -23,8 +23,8 @@ const PreviewCardMap: React.FC<PreviewCardMapProps> = ({ coordinate }) => {
         top: `${coordinate[1]}px`,
     };
 
-    const handleSelectEnterprise = (enterprise: Enterprise) => {
-        dispatch(setSelectedEnterprise(enterprise));
+    const handleSelectEnterprise = async (enterprise: Enterprise) => {
+        dispatch(fetchEnterprise({id: enterprise.id}));
         dispatch(setSelectedEnterprises([]));
     }
 
@@ -32,7 +32,8 @@ const PreviewCardMap: React.FC<PreviewCardMapProps> = ({ coordinate }) => {
         <div style={positionStyle} className="absolute z-10 p-1 bg-gray-100">
             <ScrollArea className={`${selectedEnterprises.length > 4 ? 'h-48' : 'h-auto'} rounded-md border`}>
                 <div className="p-2">
-                    {selectedEnterprises.map((enterprise, index) => (
+                    {/* @todo replace establishment_number with camelCase + use TS when will be fetched from graphql instead of Martin */}
+                    {selectedEnterprises.map((enterprise: any, index) => (
                         <div key={enterprise.establishment_number}>
                             <div onClick={() => handleSelectEnterprise(enterprise)} className="flex text-md items-center px-2 py-1 hover:bg-gray-300 rounded-lg cursor-pointer">
                                 {enterprise.name}

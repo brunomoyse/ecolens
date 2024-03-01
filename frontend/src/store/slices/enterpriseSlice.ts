@@ -131,14 +131,24 @@ export const fetchEnterprise = createAsyncThunk(
                         enterprise(
                             id: $id
                         ) {
+                            id
+                            establishmentNumber
+                            enterpriseNumber
                             name
-                            #id
-                            #establishment_number
-                            #enterprise_number
-                            #name
-                            #form
-                            #sector
-                            #nace_main
+                            form
+                            sector
+                            naceMain
+                            naceOther
+                            reliabilityIndex
+                            startDate
+                            coordinates {
+                                longitude
+                                latitude
+                            }
+                            economicalActivityPark {
+                                name
+                            }
+                            __typename
                         }
                     }
                 `,
@@ -199,8 +209,9 @@ export const enterpriseSlice = createSlice({
     reducers: {
         setSelectedEnterprises: (state, action) => {
             // Make sure to only have unique enterprises (on establishment number)
-            const uniqueEnterprises = action.payload.filter((enterprise: Enterprise, index: number, self: Enterprise[]) =>
-                index === self.findIndex((t) => (
+            // @todo replace with camelCase + use TS when will be fetched from graphql instead of Martin
+            const uniqueEnterprises = action.payload.filter((enterprise: any, index: number, self: Enterprise[]) =>
+                index === self.findIndex((t: any) => (
                     t.establishment_number === enterprise.establishment_number
                 ))
             );
@@ -238,6 +249,9 @@ export const enterpriseSlice = createSlice({
             state.isEnterpriseLoading = false
             state.enterprisesData = action.payload.data
             state.enterprisesPagination = { ...action.payload.pagination };
+        });
+        builder.addCase(fetchEnterprise.fulfilled, (state, action) => {
+            state.selectedEnterprise = action.payload
         });
         builder.addCase(fetchCircleSearchResults.fulfilled, (state, action) => {
             state.circleSearchResults = action.payload

@@ -49,14 +49,18 @@ export default function SelectedEnterpriseWidget() {
                         <ul className="list-disc space-y-2">
                             <li><strong>Nom:</strong> {selectedEnterprise.name}</li>
                             <li><strong>N° d&apos;unité
-                                d&apos;établissement:</strong> {selectedEnterprise.establishment_number}</li>
-                            <li><strong>N° d&apos;entreprise:</strong> {selectedEnterprise.enterprise_number}</li>
+                                d&apos;établissement:</strong> {selectedEnterprise.establishmentNumber}</li>
+                            <li><strong>N° d&apos;entreprise:</strong> {selectedEnterprise.enterpriseNumber}</li>
                             <li><strong>Forme juridique:</strong> {selectedEnterprise.form}</li>
-                            <li><strong>Date de création:</strong> {formatDateBE(selectedEnterprise.start_date!)}</li>
+                            <li><strong>Date de création:</strong> {formatDateBE(selectedEnterprise.startDate!)}</li>
                             <li><strong>Secteur
                                 d&apos;activité:</strong> {getSectorTranslation(selectedEnterprise.sector!)}</li>
-                            <li><strong>NACE principal:</strong> {selectedEnterprise.nace_main}</li>
-                            <li><strong>Autres NACE:</strong> {selectedEnterprise.nace_other}</li>
+                            <li><strong>NACE principal:</strong> {selectedEnterprise.naceMain}</li>
+                            <li><strong>Autres NACE:</strong> {selectedEnterprise.naceOther}</li>
+                            <li><strong>Indice fiabilité:</strong> {selectedEnterprise.reliabilityIndex}/10</li>
+                            {selectedEnterprise.economicalActivityPark && (
+                                <li><strong>PAE:</strong> {selectedEnterprise.economicalActivityPark.name}</li>
+                            )}
                             {selectedEnterprise.address && (
                                 <li>
                                     <strong>Adresse:</strong> {selectedEnterprise.address?.street_name} {selectedEnterprise.address?.street_number}, {selectedEnterprise.address?.postal_code} {selectedEnterprise.address?.municipality}

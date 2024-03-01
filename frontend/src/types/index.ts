@@ -40,22 +40,23 @@ interface Plot {
 
 interface Enterprise {
     id: string,
-    establishment_number: string,
-    enterprise_number: string,
+    establishmentNumber: string,
+    enterpriseNumber: string,
     name: string,
-    name_commercial: string|null,
-    name_short: string|null,
+    nameCommercial: string|null,
+    nameShort: string|null,
     form: string|null,
-    start_date: string|null,
-    nace_main: string|null,
-    nace_other: string[]|null,
+    startDate: string|null,
+    naceMain: string|null,
+    naceOther: string[]|null,
     sector: string|null,
-    address_extra: string|null,
-    address_id: string|null,
+    addressExtra: string|null,
+    addressId: string|null,
     address: Address|null,
-    eap_id: string|null,
+    eapId: string|null,
     economicalActivityPark: EconomicalActivityPark|null,
     coordinates: Coordinates
+    reliabilityIndex: number|null
     __typename: string
 }
 

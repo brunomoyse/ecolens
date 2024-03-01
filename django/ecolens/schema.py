@@ -106,6 +106,7 @@ class Query(graphene.ObjectType):
         sector=graphene.Argument(SectorEnum),
         naceMain=graphene.List(graphene.String),
     )
+    enterprise = graphene.Field(EnterprisesType, id=graphene.ID(required=True))
     resolver_detail_search = graphene.Field(
         DetailedSearchResponseType,
         wkt=graphene.String(required=True),
@@ -248,5 +249,11 @@ class Query(graphene.ObjectType):
             data=list(queryset),
         )
 
+    # Resolver for enterprise (single one)
+    def resolve_enterprise(self, info, id):
+        try:
+            return Enterprises.objects.get(pk=id)
+        except Enterprises.DoesNotExist:
+            return None
 # Generate the GraphQL schema
 schema = graphene.Schema(query=Query)
