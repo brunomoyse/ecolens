@@ -16,16 +16,17 @@ import {PanelBottomOpen, PanelBottomClose} from "lucide-react";
 import {useMap} from "@/context/map-context";
 import {transformExtent} from "ol/proj";
 import {debounce} from "next/dist/server/utils";
-import {setDrawnCircleRadius} from "@/store/slices/drawingSlice";
 
 export default function BottomPanel() {
     const { map } = useMap();
 
     const dispatch = useAppDispatch();
+    const filterSector = useAppSelector((state) => state.enterprise.filterSector);
+    const filterEapName = useAppSelector((state) => state.enterprise.filterEapName);
+    const filterEntityType = useAppSelector((state) => state.enterprise.filterEntityType);
     const enterprises = useAppSelector((state) => state.enterprise.enterprisesData);
     const currentPagination = useAppSelector((state) => state.enterprise.enterprisesPagination);
     const drawnFeature = useAppSelector((state) => state.drawing.drawnFeature);
-    const drawnCircleRadius = useAppSelector((state) => state.drawing.drawnCircleRadius);
 
     const panelRef = useRef<ImperativePanelHandle>(null);
     const [isPanelOpen, setIsPanelOpen] = useState(true);
@@ -39,26 +40,29 @@ export default function BottomPanel() {
         setIsPanelOpen(!isPanelOpen); // Toggle panel state
     };
 
+    const fetchData = (): void => {
 
+        if (!map) return;
+
+        let args: any = {
+            filterEapName: filterEapName,
+            filterEntityType: filterEntityType,
+            filterSector: filterSector,
+        }
+
+        if (drawnFeature) {
+            args = { ...args, wkt: drawnFeature };
+            dispatch(fetchEnterprises({ ...args, wkt: drawnFeature }));
+        } else {
+            const currentBbox3857 = map.getView().calculateExtent(map.getSize());
+            const bboxWGS84 = transformExtent(currentBbox3857, 'EPSG:3857', 'EPSG:4326');
+            args = { ...args, bbox: bboxWGS84 };
+        }
+        dispatch(fetchEnterprises({ ...args }))
+    };
 
     useEffect(() => {
         if (!map) return;
-
-        const fetchData = (args: any) => {
-            if (!map) return;
-
-            if (drawnFeature) {
-                args = { ...args, wkt: drawnFeature };
-                dispatch(fetchEnterprises({ ...args, wkt: drawnFeature }));
-            } else {
-                const currentBbox3857 = map.getView().calculateExtent(map.getSize());
-                const bboxWGS84 = transformExtent(currentBbox3857, 'EPSG:3857', 'EPSG:4326');
-                args = { ...args, bbox: bboxWGS84 };
-            }
-
-            dispatch(fetchEnterprises({ ...args }))
-        };
-
         const debouncedFetchData = debounce(fetchData, 800);
 
         // Listen for the postrender event
@@ -68,7 +72,9 @@ export default function BottomPanel() {
         return () => {
             map.un('postrender', debouncedFetchData);
         };
-    }, [map, dispatch, drawnFeature, currentPagination]);
+    }, [map, dispatch, drawnFeature, currentPagination, filterEapName, filterEntityType, filterSector]);
+
+
 
     return (
         <ResizablePanelGroup

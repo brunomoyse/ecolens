@@ -2,9 +2,9 @@
 
 import {
     Cell,
-    ColumnDef, ColumnDefTemplate,
+    ColumnDef,
     flexRender,
-    getCoreRowModel, HeaderContext,
+    getCoreRowModel,
     useReactTable,
 } from "@tanstack/react-table"
 
@@ -25,24 +25,11 @@ import {
 
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-
-import { Vector as VectorLayer } from 'ol/layer';
-import { Vector as VectorSource } from 'ol/source';
-
 import {Filter, ZoomIn} from "lucide-react";
-import {Enterprise} from "@/types";
-import {Extent} from "ol/extent";
 import {useMap} from "@/context/map-context";
-import {Geometry} from "ol/geom";
-import {Feature} from "ol";
-import Map from "ol/Map";
 import {fromLonLat} from "ol/proj";
-
-interface ZoomToFeatureProps {
-    map: Map | null;
-    latitude: number;
-    longitude: number;
-}
+import {setFilterSector, setFilterEntityType, setFilterEapName} from "@/store/slices/enterpriseSlice";
+import {useAppDispatch, useAppSelector} from "@/store/hooks";
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
@@ -53,61 +40,7 @@ const displayFilter = (header: any) => {
     return header === "Type d'entité" || header === "Secteur" || header === "NACE" || header === "PAE";
 }
 
-const getFilterContent = (header: any) => {
-    if (header === "Type d'entité") {
-        return (
-            <RadioGroup defaultValue="all">
-                <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="all" id="r1"/>
-                    <Label htmlFor="r1">Tous</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="Personne physique" id="r2"/>
-                    <Label htmlFor="r2">Personne physique</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="Personne morale" id="r3"/>
-                    <Label htmlFor="r3">Personne morale</Label>
-                </div>
-            </RadioGroup>
-        )
-    } else if (header === 'Secteur') {
-        return (
-            <RadioGroup defaultValue="all">
-                <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="all" id="r1"/>
-                    <Label htmlFor="r1">Tous</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="PRIMARY" id="r2"/>
-                    <Label htmlFor="r2">Primaire</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="SECONDARY" id="r3"/>
-                    <Label htmlFor="r3">Secondaire</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="TERTIARY" id="r3"/>
-                    <Label htmlFor="r3">Tertiaire</Label>
-                </div>
-            </RadioGroup>
-        )
-    } else if (header === 'NACE') {
-        return (
-            <div>
-                <Label htmlFor="nace" className="text-sm">Rechercher un NACE</Label>
-                <input placeholder="1234" type="number" id="nace" className="w-full rounded-md border border-gray-300 px-2 py-1"/>
-            </div>
-        )
-    } else if (header === 'PAE') {
-        return (
-            <div>
-                <Label htmlFor="eap" className="text-sm">Rechercher un PAE</Label>
-                <input placeholder="Martinroux" type="text" id="eap" className="w-full rounded-md border border-gray-300 px-2 py-1"/>
-            </div>
-        )
-    } else return '';
-}
+
 
 const getTranslationSector = (cell: Cell<any, any>) => {
     const cellValue = cell.getValue();
@@ -148,6 +81,75 @@ export function DataTable<TData, TValue>({
                                              data,
                                          }: DataTableProps<TData, TValue>) {
     const { map } = useMap();
+    const dispatch = useAppDispatch();
+
+    const getFilterContent = (header: any) => {
+        if (header === "Type d'entité") {
+            return (
+                <RadioGroup defaultValue="all" onValueChange={handleEntityChange}>
+                    <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="all" id="r1"/>
+                        <Label htmlFor="r1">Tous</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="Personne physique" id="r2"/>
+                        <Label htmlFor="r2">Personne physique</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="Personne morale" id="r3"/>
+                        <Label htmlFor="r3">Personne morale</Label>
+                    </div>
+                </RadioGroup>
+            )
+        } else if (header === 'Secteur') {
+            return (
+                <RadioGroup defaultValue="all" onValueChange={handleSectorChange}>
+                    <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="all" id="r1"/>
+                        <Label htmlFor="r1">Tous</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="PRIMARY" id="r2"/>
+                        <Label htmlFor="r2">Primaire</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="SECONDARY" id="r3"/>
+                        <Label htmlFor="r3">Secondaire</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="TERTIARY" id="r3"/>
+                        <Label htmlFor="r3">Tertiaire</Label>
+                    </div>
+                </RadioGroup>
+            )
+        } else if (header === 'NACE') {
+            return (
+                <div>
+                    <Label htmlFor="nace" className="text-sm">Rechercher un NACE</Label>
+                    <input placeholder="1234" type="number" id="nace" className="w-full rounded-md border border-gray-300 px-2 py-1"/>
+                </div>
+            )
+        } else if (header === 'PAE') {
+            return (
+                <div>
+                    <Label htmlFor="eap" className="text-sm">Rechercher un PAE</Label>
+                    <input placeholder="Martinroux" type="text" id="eap" className="w-full rounded-md border border-gray-300 px-2 py-1"/>
+                </div>
+            )
+        } else return '';
+    }
+
+    const handleEntityChange = (value: string) => {
+        dispatch(setFilterEntityType(value));
+    }
+
+    const handleSectorChange = (value: string) => {
+        dispatch(setFilterSector(value));
+    }
+
+    const handleEapNameChange = (value: string) => {
+        dispatch(setFilterEapName(value));
+    }
 
     const table = useReactTable({
         data,

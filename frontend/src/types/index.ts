@@ -33,6 +33,11 @@ interface Coordinates {
     longitude: number
 }
 
+interface Plot {
+    capakey: string
+    __typename: string
+}
+
 interface Enterprise {
     id: string,
     establishment_number: string,
@@ -49,8 +54,9 @@ interface Enterprise {
     address_id: string|null,
     address: Address|null,
     eap_id: string|null,
-    eap: EconomicalActivityPark|null,
+    economicalActivityPark: EconomicalActivityPark|null,
     coordinates: Coordinates
+    __typename: string
 }
 
 interface Address {
@@ -74,6 +80,7 @@ interface EconomicalActivityPark {
     geometry: Geometry,
     ie_id: string
     intercommunal_enterprise: IntercommunalEnterprise
+    __typename: string
 }
 
 interface IntercommunalEnterprise {
@@ -91,6 +98,7 @@ interface Pagination {
 }
 
 export type {
+    Plot,
     Pagination,
     legendArcGis,
     geoPortalService,

@@ -64,7 +64,6 @@ const createCircleWkt = (feature: Feature<Geometry>, numPoints: number = 64) => 
   return format.writeGeometry(transformedPolygon);
 };
 
-
 const useDraggable = (elementId: string, dragHandleId: string) => {
   useEffect(() => {
     const draggableElement = document.getElementById(elementId);
@@ -136,6 +135,27 @@ const useDraggable = (elementId: string, dragHandleId: string) => {
   }, [elementId, dragHandleId]);
 };
 
+function downloadCSV(content: string, fileName: string) {
+  const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.setAttribute('download', fileName);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+function convertArrayToCSV(arr: object[]): string {
+  if (arr.length === 0) return '';
+  const columnDelimiter = ',';
+  const lineDelimiter = '\n';
+  const keys = Object.keys(arr[0]);
+  const csvColumnHeader = keys.join(columnDelimiter);
+  const csvStr = arr.map(row => keys.map(key => `"${(row as any)[key]}"`).join(columnDelimiter)).join(lineDelimiter);
+  return `${csvColumnHeader}${lineDelimiter}${csvStr}`;
+}
+
+
 const debounce = <F extends (...args: any[]) => any>(func: F, wait: number): ((...args: Parameters<F>) => void) => {
   let timeout: ReturnType<typeof setTimeout> | null = null;
   return (...args: Parameters<F>) => {
@@ -154,4 +174,4 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export {createCircleWkt, formatDateBE, createTileLayerFromUrl, createEmptyVectorLayerForDrawing, useDraggable};
+export {convertArrayToCSV, downloadCSV, createCircleWkt, formatDateBE, createTileLayerFromUrl, createEmptyVectorLayerForDrawing, useDraggable};

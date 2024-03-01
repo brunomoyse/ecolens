@@ -194,7 +194,8 @@ class Query(graphene.ObjectType):
 
         # Filter by sector
         if sector:
-            queryset = queryset.filter(sector=sector)
+            sector_value = sector.value  # Convert EnumMeta instance to its value
+            queryset = queryset.filter(sector=sector_value)
 
         # Filter by naceMain
         if naceMain:

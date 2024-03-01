@@ -1,13 +1,13 @@
 // Import createAsyncThunk
 import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
-import {EconomicalActivityPark, Enterprise, Pagination} from '@/types';
+import {EconomicalActivityPark, Plot, Enterprise, Pagination} from '@/types';
 import gql from "graphql-tag";
 import apolloClient from "@/lib/apollo-client";
 
 interface circleSearchResultsType {
     enterprises: Enterprise[];
     eaps: EconomicalActivityPark[];
-    plots: any;
+    plots: Plot[];
 }
 
 // Define the initial state
@@ -18,6 +18,9 @@ interface EnterpriseState {
     selectedEnterprises: Enterprise[] | null;
     selectedEnterprise: Enterprise | null;
     circleSearchResults: circleSearchResultsType | null;
+    filterEapName: string | null;
+    filterEntityType: string | null;
+    filterSector: string | null;
 }
 
 const initialState: EnterpriseState = {
@@ -27,6 +30,9 @@ const initialState: EnterpriseState = {
     selectedEnterprises: null,
     selectedEnterprise: null,
     circleSearchResults: null,
+    filterEapName: null,
+    filterEntityType: null,
+    filterSector: null,
 };
 
 export const fetchEnterprises = createAsyncThunk(
@@ -36,6 +42,9 @@ export const fetchEnterprises = createAsyncThunk(
             let queryVariables: any = {
                 page: args.page || 1,
                 pageSize: args.pageSize || 5,
+                filterEapName: args.filterEapName || null,
+                filterEntityType: args.filterEntityType || null,
+                filterSector: args.filterSector || null,
             };
 
             if (args.bbox) {
@@ -54,8 +63,24 @@ export const fetchEnterprises = createAsyncThunk(
 
             const response = await apolloClient.query({
                 query: gql`
-                    query ($pageSize: Int, $page: Int, $bbox: [Float!], $wkt: String) {
-                        enterprises(pageSize: $pageSize, page: $page, bbox: $bbox, wkt: $wkt) {
+                    query (
+                        $pageSize: Int, 
+                        $page: Int, 
+                        $bbox: [Float!], 
+                        $wkt: String,
+                        #$filterEapName: String,
+                        #$filterEntityType: String,
+                        $filterSector: SectorEnum
+                    ) {
+                        enterprises(
+                            pageSize: $pageSize, 
+                            page: $page, 
+                            bbox: $bbox, 
+                            wkt: $wkt,
+                            #eapName: $filterEapName,
+                            #entityType: $filterEntityType,
+                            sector: $filterSector
+                        ) {
                             pagination {
                                 total
                                 perPage
@@ -194,6 +219,15 @@ export const enterpriseSlice = createSlice({
         setSelectedEnterprise: (state, action) => {
             state.selectedEnterprise = action.payload;
         },
+        setFilterEapName: (state, action) => {
+            state.filterEapName = action.payload;
+        },
+        setFilterEntityType: (state, action) => {
+            state.filterEntityType = action.payload;
+        },
+        setFilterSector: (state, action) => {
+            state.filterSector = action.payload;
+        }
     },
     extraReducers: (builder) => {
         // Handle actions defined by createAsyncThunk or other extraReducers
@@ -211,5 +245,5 @@ export const enterpriseSlice = createSlice({
     },
 });
 
-export const { setSelectedEnterprises, setSelectedEnterprise } = enterpriseSlice.actions;
+export const { setFilterEapName, setFilterSector, setFilterEntityType, setSelectedEnterprises, setSelectedEnterprise } = enterpriseSlice.actions;
 export default enterpriseSlice.reducer;

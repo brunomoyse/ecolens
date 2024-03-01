@@ -9,6 +9,7 @@ import {setDrawnCircleRadius} from "@/store/slices/drawingSlice";
 import {fetchCircleSearchResults} from "@/store/slices/enterpriseSlice";
 import {Circle, Geometry} from "ol/geom";
 import {Feature} from "ol";
+import {convertArrayToCSV, downloadCSV} from "@/lib/utils";
 
 export default function CircleInfoCard() {
     useDraggable('circle-info-card', 'drag-circle-info-card');
@@ -30,10 +31,23 @@ export default function CircleInfoCard() {
         const wktString = createCircleWkt(feature);
 
         dispatch(fetchCircleSearchResults({wkt: wktString}));
-
     };
 
-    console.log('circleSearchResults', circleSearchResults)
+    const handleExportButtonClick = () => {
+        if (!circleSearchResults) return;
+        // Export enterprises
+        const enterprisesCSV = convertArrayToCSV(circleSearchResults.enterprises.map(({ __typename, ...rest }) => rest));
+        downloadCSV(enterprisesCSV, '1_zone_entreprises.csv');
+
+        // Export eaps
+        const eapsCSV = convertArrayToCSV(circleSearchResults.eaps.map(({ __typename, ...rest }) => rest));
+        downloadCSV(eapsCSV, '2_zone_pae.csv');
+
+        // Export plots
+        const plotsCSV = convertArrayToCSV(circleSearchResults.plots.map(({ __typename, ...rest }) => rest));
+        downloadCSV(plotsCSV, '3_zone_parcelles.csv');
+    }
+
 
     return (
         <aside id="circle-info-card" className="absolute z-20 right-24 top-12 bg-gray-200 rounded-3xl shadow-lg overflow-hidden">
@@ -59,7 +73,7 @@ export default function CircleInfoCard() {
                     <li><strong>Parcelles inoccupées:</strong> à calculer</li>
                 </ul>
 
-                <Button size="sm" className="w-full mt-4 uppercase">Exporter détail</Button>
+                <Button size="sm" className="w-full mt-4 uppercase" onClick={handleExportButtonClick}>Exporter détail</Button>
 
             </div>
         </aside>
