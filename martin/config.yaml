@@ -46,24 +46,25 @@ postgres:
       buffer: 64
       clip_geom: true
       geometry_type: POINT
+      id_columns: id
       properties:
         # address_extra: text
-        address_id: uuid
-        capakey: text
-        eap_id: uuid
+        # address_id: uuid
+        # capakey: text
+        # eap_id: uuid
         # email: text
-        enterprise_number: text
-        establishment_number: text
+        # enterprise_number: text
+        # establishment_number: text
         # extra_properties: jsonb
-        form: text
+        # form: text
         id: uuid
-        nace_main: text
-        nace_other: text
+        # nace_main: text
+        # nace_other: text
         name: text
         # name_commercial: text
-        name_short: text
+        # name_short: text
         # phone: text
-        reliability_index: int4
+        # reliability_index: int4
         sector: text
         # start_date: date
         # website: text
