@@ -1,0 +1,69 @@
+postgres:
+  connection_string: $DATABASE_URL
+  auto_publish: false
+  tables:
+    geoportail_amenagement_territoire_pre:
+      schema: sandbox
+      table: geoportail_amenagement_territoire_pre
+      srid: 4326
+      geometry_column: geometry
+      bounds:
+      - 2.903371566762555
+      - 49.538289795513144
+      - 6.241672102063397
+      - 50.81211940028027
+      extent: 4096
+      buffer: 64
+      clip_geom: true
+      geometry_type: GEOMETRY
+      properties:
+        AFFECTATION: text
+        CODECARTO: text
+        CODESERVICE: text
+        DATEARRETE: int8
+        GEOM.AREA: int8
+        GEOM.LEN: int8
+        HISTO: text
+        LIBELLE: text
+        LIENDOC: text
+        NATURE: text
+        OBJECTID: int8
+        REFERENTIEL: text
+        SUPERFHA: float8
+        TIMESTAMP: int8
+        id: uuid
+    enterprises:
+      schema: ingestion
+      table: enterprises
+      srid: 31370
+      geometry_column: geom
+      bounds:
+      - 4.0704693205711076
+      - 49.94445142613651
+      - 4.614832605515273
+      - 50.61240313535785
+      extent: 4096
+      buffer: 64
+      clip_geom: true
+      geometry_type: POINT
+      properties:
+        # address_extra: text
+        address_id: uuid
+        capakey: text
+        eap_id: uuid
+        # email: text
+        enterprise_number: text
+        establishment_number: text
+        # extra_properties: jsonb
+        form: text
+        id: uuid
+        nace_main: text
+        nace_other: text
+        name: text
+        # name_commercial: text
+        name_short: text
+        # phone: text
+        reliability_index: int4
+        sector: text
+        # start_date: date
+        # website: text

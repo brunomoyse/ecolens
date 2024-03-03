@@ -18,6 +18,7 @@ services:
     working_dir: /home/node/app
     volumes:
       - "./frontend/:/home/node/app"
+      - "./frontend_env_local:/home/node/app/.env.local"
     ports:
       - "3000:3000"
     command: >
@@ -25,7 +26,9 @@ services:
       && npm run dev"
   martin:
     image: maplibre/martin
-    command: ["--default-srid=31370"]
+    command: ["--default-srid=31370", "--config=/config.yaml"]
+    volumes:
+      - "./martin/config.yaml:/config.yaml"
     ports:
       - 4000:3000
     environment:

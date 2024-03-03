@@ -54,6 +54,19 @@ django# python manage.py migrate           # run the migrations
 django# python3 manage.py  fetch_accounting_data 0419.859.055
 ```
 
+## Martin
+
+### Generation of the config file
+
+A config file is used for specifying the layers and fields to serve using martin.
+This configuration file can be generated using the option `--save-config ` :
+
+```bash
+$ docker-compose run --rm martin --save-config - > config.yml
+```
+
+Doc : https://maplibre.org/martin/config-file.html
+
 ## Deployment on the server
 
 ### Build the docker images
