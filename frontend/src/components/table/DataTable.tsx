@@ -139,7 +139,6 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
     }
 
     const handleSectorChange = (value: string) => {
-        console.log('handleSectorChange', value);
         dispatch(setFilterSector(value));
     }
 

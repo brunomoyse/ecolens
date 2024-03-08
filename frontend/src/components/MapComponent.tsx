@@ -51,7 +51,7 @@ const osmLayer = new TileLayer({
 });
 
 export default function MapComponent() {
-    const { map, addLayer } = useMap();
+    const { map, addLayer, layersAdded, setLayersAdded } = useMap();
     const isDrawingPolygon = useAppSelector((state) => state.drawing.isDrawingPolygon);
     const isDrawingCircle = useAppSelector((state) => state.drawing.isDrawingCircle);
     const drawnFeature = useAppSelector((state) => state.drawing.drawnFeature);
@@ -63,6 +63,7 @@ export default function MapComponent() {
 
     const [previewCardInfo, setPreviewCardInfo] = useState<Enterprise[]|null>(null);
     const [previewCardCoordinate, setPreviewCardCoordinate] = useState<[number, number] | undefined>(undefined);
+    const layersAddedRef = useRef(false);
 
     const preLayer = createVectorTileLayer(
         `${process.env.NEXT_PUBLIC_MAP_SERVER_ENDPOINT!}/geoportail_amenagement_territoire_pre/{z}/{x}/{y}`,
@@ -171,17 +172,26 @@ export default function MapComponent() {
     useEffect(() => {
         if (!map) return;
 
-        map.setTarget('map');
-        map.setView(namurCenteredView);
-        map.setLayers([osmLayer]);
+        // Only add the layers if they haven't been added before
+        if (!layersAdded) {
+            map.setTarget('map');
+            map.setView(namurCenteredView);
+            map.setLayers([osmLayer]);
 
-        // Add base layers using addLayer from context
-        addLayer(enterpriseLayer);
-        addLayer(preLayer);
-        addLayer(plotLayer);
-        addLayer(intercomLimitsLayer);
-        addLayer(relayBuildingsLayer);
-        addLayer(waterwaysLayer)
+            // Add base layers using addLayer from context
+            const layersToAdd = [enterpriseLayer, preLayer, plotLayer, intercomLimitsLayer, relayBuildingsLayer, waterwaysLayer];
+            const currentLayersArray = map.getLayers().getArray();
+
+            layersToAdd.forEach(layerToAdd => {
+                const existingLayer = currentLayersArray.find(layer => layer.get('title') === layerToAdd.get('title'));
+                if (!existingLayer) {
+                    addLayer(layerToAdd);
+                }
+            });
+
+            // Mark the layers as added
+            setLayersAdded(true);
+        }
     }, [map]); // eslint-disable-line
 
     useEffect(() => {
@@ -282,7 +292,7 @@ export default function MapComponent() {
 
     useEffect(() => {
         if (!map) return;
-console.log('filterSector triggered', filterSector)
+
         const enterpriseLayer = map.getLayers().getArray().find(l => l.get('title') === 'Entreprises') as VectorTileLayer
         if (!enterpriseLayer) return;
 

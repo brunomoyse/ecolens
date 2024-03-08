@@ -10,7 +10,7 @@ interface EnterpriseFilter {
 }
 
 // Define a generic style function for features
-export const createGetEnterpriseFeatureStyle = (filter: EnterpriseFilter | null) => {
+export const createGetEnterpriseFeatureStyle = (filter: EnterpriseFilter | undefined) => {
     return (feature: FeatureLike): Style => {
         // Access a property of the feature
         const propertyValue = feature.get('sector');

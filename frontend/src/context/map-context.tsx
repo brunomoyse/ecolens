@@ -16,6 +16,8 @@ interface MapContextProps {
     addLayer: (layer: BaseLayer) => void;
     removeLayer: (layer: BaseLayer) => void;
     toggleLayerVisibility: (layer: BaseLayer) => void;
+    setLayersAdded: React.Dispatch<React.SetStateAction<boolean>>;
+    layersAdded: boolean;
 }
 
 const MapContext = createContext<MapContextProps | null>(null);
@@ -36,6 +38,7 @@ interface MapProviderProps {
 export const MapProvider: React.FC<MapProviderProps> = ({ children }) => {
     const [map, setMap] = useState<Map | null>(null);
     const [layers, setLayers] = useState<BaseLayer[]>([]);
+    const [layersAdded, setLayersAdded] = useState(false);
 
     // Functions to add and remove layers
     const addLayer = (layer: BaseLayer) => {
@@ -75,7 +78,7 @@ export const MapProvider: React.FC<MapProviderProps> = ({ children }) => {
         };
     }, []);
     return (
-        <MapContext.Provider value={{ map, setMap, layers, addLayer, removeLayer, toggleLayerVisibility }}>
+        <MapContext.Provider value={{ map, setMap, layers, addLayer, removeLayer, toggleLayerVisibility, setLayersAdded, layersAdded }}>
             {children}
         </MapContext.Provider>
     );

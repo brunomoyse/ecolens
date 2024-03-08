@@ -70,7 +70,12 @@ export default function LayerWidget() {
         const newTileLayer = createTileLayerFromUrl(arcGisUrl);
         newTileLayer.set('title', subcategory)
         newTileLayer.set('temporary', true)
-        addLayer(newTileLayer);
+        // Check if layer already exists
+        const existingLayer = layers.find(layer => layer.get('title') === subcategory);
+        if (!existingLayer) {
+            // If layer does not exist, add it
+            addLayer(newTileLayer);
+        }
         setSelectedSubCategory(subcategory);
         dispatch(
             fetchGeoPortalLegend({
