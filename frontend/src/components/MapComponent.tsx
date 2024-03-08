@@ -16,6 +16,9 @@ import { Enterprise } from "@/types";
 import { Draw } from "ol/interaction";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
+    createGetEnterpriseFeatureStyle,
+} from "@/components/map/styles/EnterpriseFeatureStyle";
+import {
     setDrawingCircleState,
     setDrawnCircleCenter,
     setDrawnCircleRadius,
@@ -31,6 +34,7 @@ import { createCircleWkt } from "@/lib/utils";
 import {Circle, Geometry, Polygon} from "ol/geom";
 import { Vector as VectorLayer } from 'ol/layer';
 import { Vector as VectorSource } from 'ol/source';
+import VectorTileLayer from "ol/layer/VectorTile";
 
 // Namur's geographic coordinates (WGS84)
 const namurGeoCoords = [4.8717, 50.4670];
@@ -52,6 +56,8 @@ export default function MapComponent() {
     const isDrawingCircle = useAppSelector((state) => state.drawing.isDrawingCircle);
     const drawnFeature = useAppSelector((state) => state.drawing.drawnFeature);
     const drawnCircleRadius = useAppSelector((state) => state.drawing.drawnCircleRadius);
+    const filterEntityType = useAppSelector((state) => state.enterprise.filterEntityType);
+    const filterSector = useAppSelector((state) => state.enterprise.filterSector);
     const drawnCircle = useRef<Circle|null>(null);
     const dispatch = useAppDispatch();
 
@@ -132,8 +138,6 @@ export default function MapComponent() {
         'Délimitation intercommunales',
         3
     );
-
-
 
     useEffect(() => {
         if (!map) return;
@@ -275,6 +279,23 @@ export default function MapComponent() {
             }
         }
     }, [drawnCircleRadius]);
+
+    useEffect(() => {
+        if (!map) return;
+console.log('filterSector triggered', filterSector)
+        const enterpriseLayer = map.getLayers().getArray().find(l => l.get('title') === 'Entreprises') as VectorTileLayer
+        if (!enterpriseLayer) return;
+
+        // Filter the features of the layer "Enterprise" based on the active filters
+        if (filterEntityType || filterSector) {
+            enterpriseLayer.setStyle(
+                createGetEnterpriseFeatureStyle({
+                    entityType: filterEntityType,
+                    sector: filterSector
+                })
+            )
+        }
+    }, [filterEntityType, filterSector, map])
 
     return (
         <div id="map" className="h-screen w-screen">

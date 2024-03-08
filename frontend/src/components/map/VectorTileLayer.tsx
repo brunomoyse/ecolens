@@ -8,7 +8,9 @@ import Stroke from "ol/style/Stroke";
 import Circle from "ol/style/Circle";
 import {getPaeFeatureStyle} from "@/components/map/styles/PaeFeatureStyle";
 import {getPlotStyle} from "@/components/map/styles/PlotFeatureStyle";
-import {getEnterpriseFeatureStyle} from "@/components/map/styles/EnterpriseFeatureStyle";
+import {
+    createGetEnterpriseFeatureStyle,
+} from "@/components/map/styles/EnterpriseFeatureStyle";
 
 // Function to create a Vector Tile Layer
 const createVectorTileLayer = (
@@ -18,11 +20,17 @@ const createVectorTileLayer = (
     zIndex: number,
     minZoom?: number,
 ) => {
-    const getStyle = title === 'PRE' ? getPaeFeatureStyle :
-        title === 'Parcelles cadastrales' ? getPlotStyle :
-            title === 'Entreprises' ? getEnterpriseFeatureStyle :
-            form === 'Polygon' ? defaultPolygonStyle :
-                defaultPointStyle;
+    let getStyle;
+    if (title === 'PRE') {
+        getStyle = getPaeFeatureStyle;
+    } else if (title === 'Parcelles cadastrales') {
+        getStyle = getPlotStyle;
+    } else if (title === 'Entreprises') {
+        // Always use getEnterpriseFeatureStyle without a filter
+        getStyle = createGetEnterpriseFeatureStyle(null);
+    } else {
+        getStyle = form === 'Polygon' ? defaultPolygonStyle : defaultPointStyle;
+    }
 
     const layer = new VectorTileLayer({
         source: new VectorTileSource({

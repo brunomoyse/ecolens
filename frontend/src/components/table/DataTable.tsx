@@ -40,8 +40,6 @@ const displayFilter = (header: any) => {
     return header === "Type d'entité" || header === "Secteur" || header === "NACE" || header === "PAE";
 }
 
-
-
 const getTranslationSector = (cell: Cell<any, any>) => {
     const cellValue = cell.getValue();
     if (cellValue === 'PRIMARY') {
@@ -76,10 +74,7 @@ const zoomToFeatureOnClick = (map: any, record: any) => {
     });
 };
 
-export function DataTable<TData, TValue>({
-                                             columns,
-                                             data,
-                                         }: DataTableProps<TData, TValue>) {
+export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData, TValue>) {
     const { map } = useMap();
     const dispatch = useAppDispatch();
 
@@ -144,6 +139,7 @@ export function DataTable<TData, TValue>({
     }
 
     const handleSectorChange = (value: string) => {
+        console.log('handleSectorChange', value);
         dispatch(setFilterSector(value));
     }
 
