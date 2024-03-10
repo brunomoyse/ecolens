@@ -115,6 +115,7 @@ class Query(graphene.ObjectType):
         naceMain=graphene.List(graphene.String),
         naceLetter=graphene.String(),
         eapId=graphene.UUID(),
+        entityType=graphene.String(),
     )
     enterprise = graphene.Field(EnterprisesType, id=graphene.ID(required=True))
     resolver_detail_search = graphene.Field(
@@ -210,8 +211,13 @@ class Query(graphene.ObjectType):
         naceMain=None,
         naceLetter=None,
         eapId=None,
+        entityType=None,
     ):
         queryset = Enterprises.objects.all()
+
+        # Filter by entityType
+        if entityType:
+            queryset = queryset.filter(form=entityType)
 
         # Filter by EAP
         if eapId:

@@ -6,7 +6,9 @@ import Stroke from "ol/style/Stroke";
 
 interface EnterpriseFilter {
     entityType?: string | null,
-    sector?: string | null
+    sector?: string | null,
+    eap: string | null,
+    nace: string | null,
 }
 
 // Define a generic style function for features
@@ -15,13 +17,9 @@ export const createGetEnterpriseFeatureStyle = (filter: EnterpriseFilter | undef
         // Access a property of the feature
         const propertyValue = feature.get('sector');
 
-        // @todo add the entityType back in Martin
-        if (filter?.entityType) {
-            const filteredPropertyValue = feature.get('entityType');
-            if (filter.entityType !== filteredPropertyValue) {
-                return new Style();
-            }
-        }
+
+        // @todo Apply filter to the style based on all uuids in the store
+
         if (filter?.sector) {
             const filteredPropertyValue = feature.get('sector');
             if (filter.sector !== filteredPropertyValue) {

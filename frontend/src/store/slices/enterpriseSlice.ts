@@ -72,7 +72,7 @@ export const fetchEnterprises = createAsyncThunk(
                         $bbox: [Float!], 
                         $wkt: String,
                         $filterEap: UUID,
-                        #$filterEntityType: String,
+                        $filterEntityType: String,
                         $filterSector: SectorEnum
                         $filterNace: String
                     ) {
@@ -83,7 +83,7 @@ export const fetchEnterprises = createAsyncThunk(
                             wkt: $wkt,
                             eapId: $filterEap,
                             naceLetter: $filterNace,
-                            #entityType: $filterEntityType,
+                            entityType: $filterEntityType,
                             sector: $filterSector
                         ) {
                             pagination {

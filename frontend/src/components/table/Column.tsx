@@ -25,6 +25,16 @@ export const columns: ColumnDef<Enterprise>[] = [
     {
         accessorKey: "form",
         header: "Type d'entité",
+        cell: ({ row }) => {
+            const form = getNestedValue(row.original, 'form');
+            if (form === 'Personne physique') {
+                return 'P.P.';
+            } else if (form === 'Personne morale') {
+                return 'P.M.';
+            } else {
+                return null;
+            }
+        }
     },
     {
         accessorKey: "sector",
@@ -37,8 +47,8 @@ export const columns: ColumnDef<Enterprise>[] = [
     {
         header: 'PRE',
         cell: ({ row }) => {
-            const economicalActivityParkName = getNestedValue(row.original, 'economicalActivityPark.codeCarto');
-            return economicalActivityParkName || null;
+            const economicalActivityParkCodeCarto = getNestedValue(row.original, 'economicalActivityPark.codeCarto');
+            return economicalActivityParkCodeCarto || null;
         },
     },
     {

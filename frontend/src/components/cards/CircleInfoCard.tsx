@@ -70,7 +70,7 @@ export default function CircleInfoCard() {
                     <li><strong>Entreprises: </strong> {circleSearchResults && circleSearchResults.enterprises ? circleSearchResults.enterprises.length : 0 }</li>
                     <li><strong>Emplois:</strong> à calculer</li>
                     <li><strong>Parcelles:</strong> {circleSearchResults && circleSearchResults.plots ? circleSearchResults.plots.length : 0 }</li>
-                    <li><strong>Parcelles inoccupées:</strong> à calculer</li>
+                    <li><strong>Parcelles non-bâties:</strong> à calculer</li>
                 </ul>
 
                 <Button size="sm" className="w-full mt-4 uppercase" onClick={handleExportButtonClick}>Exporter détail</Button>

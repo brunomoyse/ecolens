@@ -58,6 +58,8 @@ export default function MapComponent() {
     const drawnCircleRadius = useAppSelector((state) => state.drawing.drawnCircleRadius);
     const filterEntityType = useAppSelector((state) => state.enterprise.filterEntityType);
     const filterSector = useAppSelector((state) => state.enterprise.filterSector);
+    const filterNace = useAppSelector((state) => state.enterprise.filterNace);
+    const filterEap = useAppSelector((state) => state.enterprise.filterEap);
     const drawnCircle = useRef<Circle|null>(null);
     const dispatch = useAppDispatch();
 
@@ -297,9 +299,11 @@ export default function MapComponent() {
         if (!enterpriseLayer) return;
 
         // Filter the features of the layer "Enterprise" based on the active filters
-        if (filterEntityType || filterSector) {
+        if (filterEntityType || filterSector || filterNace || filterEap) {
             enterpriseLayer.setStyle(
                 createGetEnterpriseFeatureStyle({
+                    nace: filterNace,
+                    eap: filterEap,
                     entityType: filterEntityType,
                     sector: filterSector
                 })
