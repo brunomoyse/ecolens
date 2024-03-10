@@ -4,7 +4,7 @@ import json
 import graphene
 from graphene_django import DjangoObjectType
 from django.contrib.gis.geos import Polygon, GEOSGeometry
-from api.models import Layer, Enterprises, EconomicalActivityPark, WalloniaPlots
+from api.models import Layer, Enterprises, EconomicalActivityPark, WalloniaPlots, NaceCode
 from django.db.models import Q, F, IntegerField
 from django.db.models.functions import LTrim, Cast
 from django.contrib.gis.db.models.functions import Distance
@@ -25,6 +25,12 @@ class WalloniaPlotsType(DjangoObjectType):
         # Since distance_to_centroid is manually set in the resolver function, just return it
         return self.distance_to_centroid
 
+
+# NaceCodeType to encapsulate nace code and description
+class NaceCodeType(DjangoObjectType):
+    class Meta:
+        model = NaceCode
+        fields = ("code", "description")
 
 # EAP
 class EconomicalActivityParkType(DjangoObjectType):
@@ -97,6 +103,7 @@ class EnterprisesWithPagination(graphene.ObjectType):
 class Query(graphene.ObjectType):
     all_layers = graphene.List(LayerType)
     layer_by_id = graphene.Field(LayerType, id=graphene.Int(required=True))
+    nace_codes = graphene.List(NaceCodeType)
     enterprises = graphene.Field(
         EnterprisesWithPagination,
         page=graphene.Int(),
@@ -105,6 +112,7 @@ class Query(graphene.ObjectType):
         wkt=graphene.String(),
         sector=graphene.Argument(SectorEnum),
         naceMain=graphene.List(graphene.String),
+        naceLetter=graphene.String(),
     )
     enterprise = graphene.Field(EnterprisesType, id=graphene.ID(required=True))
     resolver_detail_search = graphene.Field(
@@ -180,6 +188,10 @@ class Query(graphene.ObjectType):
         except Layer.DoesNotExist:
             return None
 
+    # Resolver for nace_codes
+    def resolve_nace_codes(self, info):
+        return NaceCode.objects.all()
+
     # Resolver for enterprises with simplified pagination and filters
     def resolve_enterprises(
         self,
@@ -190,6 +202,7 @@ class Query(graphene.ObjectType):
         wkt=None,
         sector=None,
         naceMain=None,
+        naceLetter=None,
     ):
         queryset = Enterprises.objects.all()
 
@@ -203,6 +216,10 @@ class Query(graphene.ObjectType):
             queryset = queryset.annotate(trimmed_value=LTrim(F("nace_main"))).filter(
                 trimmed_value__startswith=naceMain
             )
+
+        # Filter by naceLetter (letter A-U)
+        if naceLetter:
+            queryset = queryset.filter(nace_letter=naceLetter)
 
         # Filter on extent
         if bbox:

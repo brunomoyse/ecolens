@@ -83,6 +83,7 @@ class Enterprises(models.Model):
     start_date = models.DateField(blank=True, null=True)
     nace_main = ArrayField(models.TextField(blank=True), blank=True, null=True, default=list)
     nace_other = ArrayField(models.TextField(blank=True), blank=True, null=True, default=list)
+    nace_letter = models.TextField(blank=True, null=True)
     sector = models.CharField(max_length=10, blank=True, null=True, choices=Sector.choices)
     address_extra = models.TextField(blank=True, null=True)
     website = models.TextField(blank=True, null=True)
@@ -146,3 +147,23 @@ class WalloniaPlots(models.Model):
         managed = False
         db_table = '"plots"."wallonia"'
 
+class NaceCodeManager(models.Manager):
+    def get_queryset(self):
+        # Override the default queryset to apply specific filters
+        return super().get_queryset().filter(
+            code__regex=r'^[A-Za-z]+$',
+            category='Nace2008',
+            language='FR'
+        )
+
+class NaceCode(models.Model):
+    code = models.TextField(primary_key=True)
+    description = models.TextField()
+    category = models.TextField()
+    language = models.TextField()
+
+    objects = NaceCodeManager()
+
+    class Meta:
+        managed = False
+        db_table = '"kbo"."code"'
