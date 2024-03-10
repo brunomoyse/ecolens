@@ -18,7 +18,8 @@ interface EnterpriseState {
     selectedEnterprises: Enterprise[] | null;
     selectedEnterprise: Enterprise | null;
     circleSearchResults: circleSearchResultsType | null;
-    filterEapName: string | null;
+    filterEap: string | null;
+    filterNace: string | null;
     filterEntityType: string | null;
     filterSector: string | null;
 }
@@ -30,7 +31,8 @@ const initialState: EnterpriseState = {
     selectedEnterprises: null,
     selectedEnterprise: null,
     circleSearchResults: null,
-    filterEapName: null,
+    filterEap: null,
+    filterNace: null,
     filterEntityType: null,
     filterSector: null,
 };
@@ -42,7 +44,8 @@ export const fetchEnterprises = createAsyncThunk(
             let queryVariables: any = {
                 page: args.page || 1,
                 pageSize: args.pageSize || 5,
-                filterEapName: args.filterEapName || null,
+                filterEap: args.filterEap || null,
+                filterNace: args.filterNace || null,
                 filterEntityType: args.filterEntityType || null,
                 filterSector: args.filterSector || null,
             };
@@ -68,16 +71,18 @@ export const fetchEnterprises = createAsyncThunk(
                         $page: Int, 
                         $bbox: [Float!], 
                         $wkt: String,
-                        #$filterEapName: String,
+                        $filterEap: UUID,
                         #$filterEntityType: String,
                         $filterSector: SectorEnum
+                        $filterNace: String
                     ) {
                         enterprises(
                             pageSize: $pageSize, 
                             page: $page, 
                             bbox: $bbox, 
                             wkt: $wkt,
-                            #eapName: $filterEapName,
+                            eapId: $filterEap,
+                            naceLetter: $filterNace,
                             #entityType: $filterEntityType,
                             sector: $filterSector
                         ) {
@@ -103,6 +108,7 @@ export const fetchEnterprises = createAsyncThunk(
                                 }
                                 economicalActivityPark {
                                     name
+                                    codeCarto
                                 }
                                 __typename
                             }
@@ -229,8 +235,11 @@ export const enterpriseSlice = createSlice({
         setSelectedEnterprise: (state, action) => {
             state.selectedEnterprise = action.payload;
         },
-        setFilterEapName: (state, action) => {
-            state.filterEapName = action.payload;
+        setFilterEap: (state, action) => {
+            state.filterEap = action.payload;
+        },
+        setFilterNace: (state, action) => {
+            state.filterNace = action.payload;
         },
         setFilterEntityType: (state, action) => {
             state.filterEntityType = action.payload;
@@ -258,5 +267,5 @@ export const enterpriseSlice = createSlice({
     },
 });
 
-export const { setFilterEapName, setFilterSector, setFilterEntityType, setSelectedEnterprises, setSelectedEnterprise } = enterpriseSlice.actions;
+export const { setFilterNace, setFilterEap, setFilterSector, setFilterEntityType, setSelectedEnterprises, setSelectedEnterprise } = enterpriseSlice.actions;
 export default enterpriseSlice.reducer;

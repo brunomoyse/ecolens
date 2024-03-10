@@ -37,7 +37,7 @@ class EconomicalActivityParkType(DjangoObjectType):
     distance_to_centroid = graphene.Int()
     class Meta:
         model = EconomicalActivityPark
-        fields = ("id", "name")
+        fields = ("id", "name", "code_carto")
 
     def resolve_distance_to_centroid(self, info):
         # Since distance_to_centroid is manually set in the resolver function, just return it
@@ -104,6 +104,7 @@ class Query(graphene.ObjectType):
     all_layers = graphene.List(LayerType)
     layer_by_id = graphene.Field(LayerType, id=graphene.Int(required=True))
     nace_codes = graphene.List(NaceCodeType)
+    economical_activity_parks = graphene.List(EconomicalActivityParkType)
     enterprises = graphene.Field(
         EnterprisesWithPagination,
         page=graphene.Int(),
@@ -113,6 +114,7 @@ class Query(graphene.ObjectType):
         sector=graphene.Argument(SectorEnum),
         naceMain=graphene.List(graphene.String),
         naceLetter=graphene.String(),
+        eapId=graphene.UUID(),
     )
     enterprise = graphene.Field(EnterprisesType, id=graphene.ID(required=True))
     resolver_detail_search = graphene.Field(
@@ -192,6 +194,10 @@ class Query(graphene.ObjectType):
     def resolve_nace_codes(self, info):
         return NaceCode.objects.all()
 
+    # Resolver for economical_activity_parks
+    def resolve_economical_activity_parks(self, info):
+        return EconomicalActivityPark.objects.all()
+
     # Resolver for enterprises with simplified pagination and filters
     def resolve_enterprises(
         self,
@@ -203,8 +209,13 @@ class Query(graphene.ObjectType):
         sector=None,
         naceMain=None,
         naceLetter=None,
+        eapId=None,
     ):
         queryset = Enterprises.objects.all()
+
+        # Filter by EAP
+        if eapId:
+            queryset = queryset.filter(eap_id=eapId)
 
         # Filter by sector
         if sector:

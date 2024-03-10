@@ -62,9 +62,9 @@ interface Enterprise {
 
 interface Address {
     id: string,
-    street_name: string,
-    street_number: string,
-    postal_code: string,
+    streetName: string,
+    streetNumber: string,
+    postalCode: string,
     municipality: string,
     district: string,
     province: string,
@@ -75,12 +75,8 @@ interface Address {
 interface EconomicalActivityPark {
     id: string,
     name: string,
-    document_url: string,
-    area: string,
-    allocation: string,
-    geometry: Geometry,
-    ie_id: string
-    intercommunal_enterprise: IntercommunalEnterprise
+    codeCarto: string,
+    //intercommunal_enterprise: IntercommunalEnterprise
     __typename: string
 }
 

@@ -50,14 +50,15 @@ class View(models.Model):
 class EconomicalActivityPark(models.Model):
     id = models.UUIDField(primary_key=True)
     name = models.TextField(blank=True, null=True, db_column="LIBELLE")
+    code_carto = models.TextField(blank=True, null=True, db_column="CODECARTO")
     geom = models.GeometryField(blank=True, srid=4326, db_column="geometry")
 
     class Meta:
         managed = False
-        db_table = 'pre_geoportail'
+        db_table = '"ingestion"."pre_geoportail"'
 
-    def __str__(self):
-        return self.name
+    #def __str__(self):
+    #    return self.name
 
 class Enterprises(models.Model):
     """Final enterprises (displayed on the map)"""

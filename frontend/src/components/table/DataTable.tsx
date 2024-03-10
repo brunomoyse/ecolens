@@ -35,16 +35,17 @@ import {
     TableRow,
 } from "@/components/ui/table"
 
-import { NaceCode as NaceType } from "@/types"
+import {EconomicalActivityPark, NaceCode as NaceType} from "@/types"
 import { fetchNaceCodes } from "@/store/slices/naceCodeSlice";
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import {Filter, ZoomIn} from "lucide-react";
 import {useMap} from "@/context/map-context";
 import {fromLonLat} from "ol/proj";
-import {setFilterSector, setFilterEntityType, setFilterEapName} from "@/store/slices/enterpriseSlice";
+import {setFilterSector, setFilterEntityType, setFilterEap, setFilterNace} from "@/store/slices/enterpriseSlice";
 import {useAppDispatch, useAppSelector} from "@/store/hooks";
 import {useEffect, useState} from "react";
+import {fetchEaps} from "@/store/slices/eapSlice";
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
@@ -52,7 +53,7 @@ interface DataTableProps<TData, TValue> {
 }
 
 const displayFilter = (header: any) => {
-    return header === "Type d'entité" || header === "Secteur" || header === "NACE" || header === "PAE";
+    return header === "Type d'entité" || header === "Secteur" || header === "NACE" || header === "PRE";
 }
 
 const getTranslationSector = (cell: Cell<any, any>) => {
@@ -93,9 +94,11 @@ const zoomToFeatureOnClick = (map: any, record: any) => {
 export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData, TValue>) {
     const { map } = useMap();
     const naceCodes = useAppSelector((state) => state.naceCode.naceCodes);
+    const economicalActivityParks = useAppSelector((state) => state.eap.economicalActivityParks);
 
     const filterSector = useAppSelector((state) => state.enterprise.filterSector);
-    const filterEapName = useAppSelector((state) => state.enterprise.filterEapName);
+    const filterEap = useAppSelector((state) => state.enterprise.filterEap);
+    const filterNace = useAppSelector((state) => state.enterprise.filterNace);
     const filterEntityType = useAppSelector((state) => state.enterprise.filterEntityType);
 
     const dispatch = useAppDispatch();
@@ -104,6 +107,7 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
     useEffect(() => {
         if (!map) return;
         dispatch(fetchNaceCodes());
+        dispatch(fetchEaps());
     }, [map]); /* eslint-disable-line */
 
 
@@ -147,7 +151,7 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
                 </RadioGroup>
             )
         } else if (header === 'NACE') {
-            return <Select>
+            return <Select defaultValue={filterNace ?? undefined} onValueChange={handleNaceChange}>
                 <SelectTrigger>
                     <SelectValue placeholder="Sélectionner une section" />
                 </SelectTrigger>
@@ -160,14 +164,20 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
                     </SelectGroup>
                 </SelectContent>
             </Select>
-        } else if (header === 'PAE') {
-            return (
-                <div>
-                    <Label htmlFor="eap" className="text-sm">Rechercher un PAE</Label>
-                    <input placeholder="Martinroux" type="text" id="eap"
-                           className="w-full rounded-md border border-gray-300 px-2 py-1"/>
-                </div>
-            )
+        } else if (header === 'PRE') {
+            return <Select defaultValue={filterEap ?? undefined} onValueChange={handleEapChange}>
+                <SelectTrigger>
+                    <SelectValue placeholder="Sélectionner un PRE" />
+                </SelectTrigger>
+                <SelectContent className="max-w-96">
+                    <SelectGroup>
+                        <SelectLabel>Codes Carto</SelectLabel>
+                        {economicalActivityParks.map((eap: EconomicalActivityPark) => (
+                            <SelectItem key={eap.id} value={eap.id}>{eap.codeCarto}</SelectItem>
+                        ))}
+                    </SelectGroup>
+                </SelectContent>
+            </Select>
         } else return '';
     }
 
@@ -177,9 +187,9 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
         } else if (header === 'Secteur') {
             return !!filterSector;
         } else if (header === 'NACE') {
-            return false;
-        } else if (header === 'PAE') {
-            return !!filterEapName;
+            return !!filterNace;
+        } else if (header === 'PRE') {
+            return !!filterEap;
         } else return false;
     }
 
@@ -200,8 +210,12 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
         dispatch(setFilterSector(value));
     }
 
-    const handleEapNameChange = (value: string) => {
-        dispatch(setFilterEapName(value));
+    const handleNaceChange = (value: string) => {
+        dispatch(setFilterNace(value));
+    }
+
+    const handleEapChange = (value: string) => {
+        dispatch(setFilterEap(value));
     }
 
     const table = useReactTable({

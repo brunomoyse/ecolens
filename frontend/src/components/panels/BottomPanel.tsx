@@ -22,7 +22,8 @@ export default function BottomPanel() {
 
     const dispatch = useAppDispatch();
     const filterSector = useAppSelector((state) => state.enterprise.filterSector);
-    const filterEapName = useAppSelector((state) => state.enterprise.filterEapName);
+    const filterEap = useAppSelector((state) => state.enterprise.filterEap);
+    const filterNace = useAppSelector((state) => state.enterprise.filterNace);
     const filterEntityType = useAppSelector((state) => state.enterprise.filterEntityType);
     const enterprises = useAppSelector((state) => state.enterprise.enterprisesData);
     const currentPagination = useAppSelector((state) => state.enterprise.enterprisesPagination);
@@ -45,7 +46,8 @@ export default function BottomPanel() {
         if (!map) return;
 
         let args: any = {
-            filterEapName: filterEapName,
+            filterEap: filterEap,
+            filterNace: filterNace,
             filterEntityType: filterEntityType,
             filterSector: filterSector,
         }
@@ -72,7 +74,7 @@ export default function BottomPanel() {
         return () => {
             map.un('postrender', debouncedFetchData);
         };
-    }, [map, dispatch, drawnFeature, currentPagination, filterEapName, filterEntityType, filterSector]);
+    }, [map, dispatch, drawnFeature, currentPagination, filterEap, filterNace, filterEntityType, filterSector]);
 
 
 

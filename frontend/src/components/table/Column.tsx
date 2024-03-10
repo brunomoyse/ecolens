@@ -35,9 +35,9 @@ export const columns: ColumnDef<Enterprise>[] = [
         header: "NACE",
     },
     {
-        header: 'PAE',
+        header: 'PRE',
         cell: ({ row }) => {
-            const economicalActivityParkName = getNestedValue(row.original, 'economicalActivityPark.name');
+            const economicalActivityParkName = getNestedValue(row.original, 'economicalActivityPark.codeCarto');
             return economicalActivityParkName || null;
         },
     },
