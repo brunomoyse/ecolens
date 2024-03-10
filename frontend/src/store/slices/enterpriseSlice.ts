@@ -95,8 +95,7 @@ export const fetchEnterprises = createAsyncThunk(
                                 name
                                 form
                                 sector
-                                naceMain
-                                naceOther
+                                naceLetter
                                 reliabilityIndex
                                 coordinates {
                                     longitude

@@ -9,17 +9,6 @@ import {
 } from "@tanstack/react-table"
 
 import * as React from "react"
-import { CaretSortIcon, CheckIcon } from "@radix-ui/react-icons"
-
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import {
-    Command,
-    CommandEmpty,
-    CommandGroup,
-    CommandInput,
-    CommandItem, CommandList, CommandSeparator,
-} from "@/components/ui/command"
 
 import {
     Select,
@@ -105,12 +94,12 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
     const { map } = useMap();
     const naceCodes = useAppSelector((state) => state.naceCode.naceCodes);
 
-    const [isFilterNaceOpened, setIsFilterNaceOpened] = useState(false);
-    const [filterNace, setFilterNace] = useState<string|null>(null);
+    const filterSector = useAppSelector((state) => state.enterprise.filterSector);
+    const filterEapName = useAppSelector((state) => state.enterprise.filterEapName);
+    const filterEntityType = useAppSelector((state) => state.enterprise.filterEntityType);
+
     const dispatch = useAppDispatch();
 
-    const [open, setOpen] = React.useState(false)
-    const [filter, setFilter] = React.useState("")
 
     useEffect(() => {
         if (!map) return;
@@ -138,7 +127,7 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
             )
         } else if (header === 'Secteur') {
             return (
-                <RadioGroup defaultValue="all" onValueChange={handleSectorChange}>
+                <RadioGroup defaultValue={filterSector ?? 'all'} onValueChange={handleSectorChange}>
                     <div className="flex items-center space-x-2">
                         <RadioGroupItem value="all" id="r1"/>
                         <Label htmlFor="r1">Tous</Label>
@@ -182,11 +171,32 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
         } else return '';
     }
 
+    const getFilterIconStatus = (header: any): boolean => {
+        if (header === "Type d'entité") {
+            return !!filterEntityType;
+        } else if (header === 'Secteur') {
+            return !!filterSector;
+        } else if (header === 'NACE') {
+            return false;
+        } else if (header === 'PAE') {
+            return !!filterEapName;
+        } else return false;
+    }
+
     const handleEntityChange = (value: string) => {
+        if (value === 'all') {
+            dispatch(setFilterEntityType(null));
+            return;
+        }
         dispatch(setFilterEntityType(value));
     }
 
     const handleSectorChange = (value: string) => {
+        if (value === 'all') {
+            dispatch(setFilterSector(null));
+            return;
+        }
+
         dispatch(setFilterSector(value));
     }
 
@@ -216,7 +226,7 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
                                             {displayFilter(header.column.columnDef.header!) ?
                                                 <Popover>
                                                     <PopoverTrigger>
-                                                        <Filter className="h-5 w-5 mr-2" />
+                                                        <Filter className="h-5 w-5 mr-2" fill={getFilterIconStatus(header.column.columnDef.header) ? 'black' : 'white'} />
                                                     </PopoverTrigger>
                                                     <PopoverContent side="top">
                                                         { getFilterContent(header.column.columnDef.header) }
