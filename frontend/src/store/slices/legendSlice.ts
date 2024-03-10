@@ -1,9 +1,6 @@
 import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
-import {Polygon} from "ol/geom";
 import {legendArcGis} from "@/types";
-import {fetchEnterprises} from "@/store/slices/enterpriseSlice";
-import apolloClient from "@/lib/apollo-client";
-import gql from "graphql-tag";
+
 interface geoPortalLegendItem {
     layerName: string
     legendData: legendArcGis

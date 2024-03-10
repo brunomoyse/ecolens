@@ -98,6 +98,11 @@ interface Pagination {
     firstPage: number;
 }
 
+interface NaceCode {
+    code: string,
+    description: string
+}
+
 export type {
     Plot,
     Pagination,
@@ -106,5 +111,6 @@ export type {
     Enterprise,
     Address,
     EconomicalActivityPark,
-    IntercommunalEnterprise
+    IntercommunalEnterprise,
+    NaceCode
 };

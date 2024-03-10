@@ -4,6 +4,7 @@ import enterpriseReducer from './slices/enterpriseSlice';
 import widgetReducer from './slices/widgetSlice';
 import eapReducer from './slices/eapSlice';
 import legendReducer from './slices/legendSlice';
+import naceCodeReducer from './slices/naceCodeSlice';
 
 export const store = configureStore({
     reducer: {
@@ -12,6 +13,7 @@ export const store = configureStore({
         widget: widgetReducer,
         eap: eapReducer,
         legend: legendReducer,
+        naceCode: naceCodeReducer,
     },
 });
 

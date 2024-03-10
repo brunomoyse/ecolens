@@ -31,12 +31,8 @@ export const columns: ColumnDef<Enterprise>[] = [
         header: "Secteur",
     },
     {
-        accessorKey: "naceMain",
+        accessorKey: "naceLetter",
         header: "NACE",
-    },
-    {
-        accessorKey: "naceOther",
-        header: "NACE (autres)",
     },
     {
         header: 'PAE',

@@ -8,6 +8,35 @@ import {
     useReactTable,
 } from "@tanstack/react-table"
 
+import * as React from "react"
+import { CaretSortIcon, CheckIcon } from "@radix-ui/react-icons"
+
+import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
+import {
+    Command,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem, CommandList, CommandSeparator,
+} from "@/components/ui/command"
+
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectLabel,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
+
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover"
+
 import {
     Table,
     TableBody,
@@ -17,12 +46,8 @@ import {
     TableRow,
 } from "@/components/ui/table"
 
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "@/components/ui/popover"
-
+import { NaceCode as NaceType } from "@/types"
+import { fetchNaceCodes } from "@/store/slices/naceCodeSlice";
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import {Filter, ZoomIn} from "lucide-react";
@@ -30,6 +55,7 @@ import {useMap} from "@/context/map-context";
 import {fromLonLat} from "ol/proj";
 import {setFilterSector, setFilterEntityType, setFilterEapName} from "@/store/slices/enterpriseSlice";
 import {useAppDispatch, useAppSelector} from "@/store/hooks";
+import {useEffect, useState} from "react";
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
@@ -74,9 +100,23 @@ const zoomToFeatureOnClick = (map: any, record: any) => {
     });
 };
 
+
 export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData, TValue>) {
     const { map } = useMap();
+    const naceCodes = useAppSelector((state) => state.naceCode.naceCodes);
+
+    const [isFilterNaceOpened, setIsFilterNaceOpened] = useState(false);
+    const [filterNace, setFilterNace] = useState<string|null>(null);
     const dispatch = useAppDispatch();
+
+    const [open, setOpen] = React.useState(false)
+    const [filter, setFilter] = React.useState("")
+
+    useEffect(() => {
+        if (!map) return;
+        dispatch(fetchNaceCodes());
+    }, [map]); /* eslint-disable-line */
+
 
     const getFilterContent = (header: any) => {
         if (header === "Type d'entité") {
@@ -118,17 +158,25 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
                 </RadioGroup>
             )
         } else if (header === 'NACE') {
-            return (
-                <div>
-                    <Label htmlFor="nace" className="text-sm">Rechercher un NACE</Label>
-                    <input placeholder="1234" type="number" id="nace" className="w-full rounded-md border border-gray-300 px-2 py-1"/>
-                </div>
-            )
+            return <Select>
+                <SelectTrigger>
+                    <SelectValue placeholder="Sélectionner une section" />
+                </SelectTrigger>
+                <SelectContent className="max-w-96">
+                    <SelectGroup>
+                        <SelectLabel>Sections</SelectLabel>
+                        {naceCodes.map((nace: NaceType) => (
+                            <SelectItem key={nace.code} value={nace.code}>{nace.description}</SelectItem>
+                        ))}
+                    </SelectGroup>
+                </SelectContent>
+            </Select>
         } else if (header === 'PAE') {
             return (
                 <div>
                     <Label htmlFor="eap" className="text-sm">Rechercher un PAE</Label>
-                    <input placeholder="Martinroux" type="text" id="eap" className="w-full rounded-md border border-gray-300 px-2 py-1"/>
+                    <input placeholder="Martinroux" type="text" id="eap"
+                           className="w-full rounded-md border border-gray-300 px-2 py-1"/>
                 </div>
             )
         } else return '';
