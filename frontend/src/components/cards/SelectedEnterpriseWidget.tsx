@@ -63,7 +63,7 @@ export default function SelectedEnterpriseWidget() {
                             )}
                             {selectedEnterprise.address && (
                                 <li>
-                                    <strong>Adresse:</strong> {selectedEnterprise.address?.street_name} {selectedEnterprise.address?.street_number}, {selectedEnterprise.address?.postal_code} {selectedEnterprise.address?.municipality}
+                                    <strong>Adresse:</strong> {selectedEnterprise.address?.streetName} {selectedEnterprise.address?.streetNumber}, {selectedEnterprise.address?.postalCode} {selectedEnterprise.address?.municipality}
                                     <span className="text-sm text-gray-500">(Indice de fiabilité: élevé)</span>
                                 </li>
                             )}
