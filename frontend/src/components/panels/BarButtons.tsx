@@ -12,13 +12,20 @@ import {useMap} from "@/context/map-context";
 import { Parser } from 'json2csv';
 import {ReloadIcon} from "@radix-ui/react-icons";
 import {useState} from "react";
+import apolloClient from "@/lib/apollo-client";
+import gql from "graphql-tag";
+import {transformExtent} from "ol/proj";
 
 export default function BarButtons() {
     const { map } = useMap();
 
-    const enterprises = useAppSelector((state) => state.enterprise.enterprisesData);
     const drawingState = useAppSelector((state) => state.drawing);
     const dispatch = useAppDispatch();
+    const filterSector = useAppSelector((state) => state.enterprise.filterSector);
+    const filterEap = useAppSelector((state) => state.enterprise.filterEap);
+    const filterNace = useAppSelector((state) => state.enterprise.filterNace);
+    const filterEntityType = useAppSelector((state) => state.enterprise.filterEntityType);
+    const drawnFeature = useAppSelector((state) => state.drawing.drawnFeature);
 
     // Exporting state
     const [isExporting, setIsExporting] = useState(false);
@@ -44,20 +51,111 @@ export default function BarButtons() {
     }
 
     const handleExport = async () => {
-        if (!enterprises || enterprises.length === 0) return;
+        if (!map) return;
         setIsExporting(true);
+
+        let queryVariables: any = {
+            page: 1,
+            pageSize: 43800,
+            filterEap: filterEap || null,
+            filterNace: filterNace || null,
+            filterEntityType: filterEntityType || null,
+            filterSector: filterSector || null,
+        };
+
+        if (drawnFeature) {
+            queryVariables = {
+                ...queryVariables,
+                wkt: drawnFeature,
+            }
+        } else {
+            const currentBbox3857 = map.getView().calculateExtent(map.getSize());
+            const bboxWGS84 = transformExtent(currentBbox3857, 'EPSG:3857', 'EPSG:4326');
+
+            queryVariables = {
+                ...queryVariables,
+                bbox: bboxWGS84,
+            }
+        }
+
+        const response = await apolloClient.query({
+            query: gql`
+                    query (
+                        $pageSize: Int, 
+                        $page: Int, 
+                        $bbox: [Float!], 
+                        $wkt: String,
+                        $filterEap: UUID,
+                        $filterEntityType: String,
+                        $filterSector: SectorEnum
+                        $filterNace: String
+                    ) {
+                        enterprises(
+                            pageSize: $pageSize, 
+                            page: $page, 
+                            bbox: $bbox, 
+                            wkt: $wkt,
+                            eapId: $filterEap,
+                            naceLetter: $filterNace,
+                            entityType: $filterEntityType,
+                            sector: $filterSector
+                        ) {
+                            pagination {
+                                total
+                                perPage
+                                currentPage
+                                lastPage
+                                firstPage
+                            }
+                            data {
+                                id
+                                establishmentNumber
+                                enterpriseNumber
+                                name
+                                form
+                                sector
+                                naceLetter
+                                reliabilityIndex
+                                coordinates {
+                                    longitude
+                                    latitude
+                                }
+                                economicalActivityPark {
+                                    name
+                                    codeCarto
+                                }
+                                __typename
+                            }
+
+                        }
+                    }
+                `,
+            variables: queryVariables,
+        });
+
+        const enterprises = response.data.enterprises.data;
 
         try {
             const parser = new Parser();
             // @ts-ignore
-            const enterprisesCopy = [...enteprises].map(({ __typename, id, ...rest }) => rest);
+            let enterprisesCopy = [...enterprises].map(({ __typename, id, ...rest }) => rest);
+            // Remove __typename from coordinates
+            enterprisesCopy = enterprisesCopy.map((enterprise) => {
+                if (enterprise.coordinates) {
+                    // @ts-ignore
+                    const { __typename, ...rest } = enterprise.coordinates;
+                    // Round coordinates to 6 decimals
+                    rest.latitude = Number(rest.latitude.toFixed(6));
+                    rest.longitude = Number(rest.longitude.toFixed(6));
 
+                    return { ...enterprise, coordinates: rest };
+                }
+                return enterprise;
+            });
             const csv = parser.parse(enterprisesCopy);
-
             // Get the current date and time and format it as dd-mm-yy_hh-mm
             const now = new Date();
             const fileNameDatePart = `${String(now.getDate()).padStart(2, '0')}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getFullYear()).slice(-2)}_${String(now.getHours()).padStart(2, '0')}-${String(now.getMinutes()).padStart(2, '0')}-${String(now.getSeconds()).padStart(2, '0')}`;
-
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
@@ -94,9 +192,16 @@ export default function BarButtons() {
                 </Button>
             )}
             {/* Export */}
+            {!isExporting && (
             <Button onClick={handleExport} variant="outline" size="icon" className="h-12 w-12 rounded-full border-2 border-red-600 mb-4">
-                {isExporting ? <ReloadIcon className="mr-2 h-4 w-4 animate-spin" /> : <Download className="h-6 w-6" />}
+                <Download className="h-6 w-6" />
             </Button>
+            )}
+            {isExporting && (
+                <Button disabled variant="outline" size="icon" className="h-12 w-12 rounded-full border-2 border-red-600 mb-4">
+                    <ReloadIcon className="h-6 w-6 animate-spin" />
+                </Button>
+            )}
         </div>
     );
 }

@@ -5,70 +5,73 @@ import Circle from "ol/style/Circle";
 import Stroke from "ol/style/Stroke";
 
 interface EnterpriseFilter {
-    entityType?: string | null,
-    sector?: string | null,
-    eap: string | null,
-    nace: string | null,
+    mapEnterpriseIds: Set<string>
 }
+
+// Green
+const primaryStyle = new Style({
+    image: new Circle({
+        radius: 5,
+        fill: new Fill({
+            color: '#22C55E'
+        }),
+    })
+});
+
+
+// Red
+const secondaryStyle = new Style({
+    image: new Circle({
+        radius: 5,
+        fill: new Fill({
+            color: '#EF4444'
+        }),
+    })
+});
+
+
+// Blue
+const tertiaryStyle = new Style({
+    image: new Circle({
+        radius: 5,
+        fill: new Fill({
+            color: '#3B82F6'
+        }),
+    })
+});
+
+// Grey
+const defaultStyle = new Style({
+    image: new Circle({
+        radius: 5,
+        fill: new Fill({
+            color: '#475569'
+        }),
+    }),
+    stroke: new Stroke({
+        color: '#0A0A0A',
+        width: 1
+    })
+});
 
 // Define a generic style function for features
 export const createGetEnterpriseFeatureStyle = (filter: EnterpriseFilter | undefined) => {
     return (feature: FeatureLike): Style => {
-        // Access a property of the feature
-        const propertyValue = feature.get('sector');
+        // Access the sector property of the feature
+        const sectorPropertyValue = feature.get('sector');
 
-
-        // @todo Apply filter to the style based on all uuids in the store
-
-        if (filter?.sector) {
-            const filteredPropertyValue = feature.get('sector');
-            if (filter.sector !== filteredPropertyValue) {
+        // Apply filter to the style based on all uuids in the store
+        if (filter?.mapEnterpriseIds) {
+            const filteredPropertyValue = feature.get('id');
+            if (!filter.mapEnterpriseIds.has(filteredPropertyValue)) {
                 return new Style();
             }
         }
 
-        // Apply different styles based on the property value
-        if (propertyValue === 'PRIMARY') {
-            return new Style({
-                image: new Circle({
-                    radius: 5,
-                    fill: new Fill({
-                        color: '#22C55E'
-                    }),
-                })
-            });
-        } else if (propertyValue === 'SECONDARY') {
-            return new Style({
-                image: new Circle({
-                    radius: 5,
-                    fill: new Fill({
-                        color: '#EF4444'
-                    }),
-                })
-            });
-        } else if (propertyValue === 'TERTIARY') {
-            return new Style({
-                image: new Circle({
-                    radius: 5,
-                    fill: new Fill({
-                        color: '#3B82F6'
-                    }),
-                })
-            });
-        }
-
-        // Default style if no conditions are met
-        return new Style({
-            image: new Circle({
-                radius: 5,
-                fill: new Fill({
-                    color: '#475569'
-                }),
-            }),
-            stroke: new Stroke({
-                color: '#0A0A0A', // Red stroke color
-                width: 1
-            })
-        });
+        // Apply different styles based on the sector property value
+        if (sectorPropertyValue === 'PRIMARY') return primaryStyle;
+        else if (sectorPropertyValue === 'SECONDARY') return secondaryStyle;
+        else if (sectorPropertyValue === 'TERTIARY') return tertiaryStyle;
+        else return defaultStyle;
     };
 };

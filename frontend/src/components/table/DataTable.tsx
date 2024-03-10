@@ -85,7 +85,7 @@ const zoomToFeatureOnClick = (map: any, record: any) => {
     // Setting the view to the feature's coordinates with some options
     map.getView().animate({
         center: featureCoordinates,
-        zoom: 21,
+        zoom: 20,
         duration: 1000
     });
 };

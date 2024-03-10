@@ -69,7 +69,7 @@ class Enterprises(models.Model):
         TERTIARY = "TERTIARY", "TERTIARY"
 
     def __str__(self):
-        return self.name
+        return self.name or self.name_commercial or self.name_short
 
     # TODO : not possible to chose the schema in Django,
     # having same table name in different schema

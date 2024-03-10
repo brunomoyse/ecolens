@@ -27,7 +27,7 @@ const createVectorTileLayer = (
         getStyle = getPlotStyle;
     } else if (title === 'Entreprises') {
         // Always use getEnterpriseFeatureStyle without a filter
-        getStyle = createGetEnterpriseFeatureStyle(null);
+        getStyle = createGetEnterpriseFeatureStyle(undefined);
     } else {
         getStyle = form === 'Polygon' ? defaultPolygonStyle : defaultPointStyle;
     }

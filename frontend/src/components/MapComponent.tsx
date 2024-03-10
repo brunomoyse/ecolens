@@ -25,7 +25,7 @@ import {
     setDrawnFeature
 } from "@/store/slices/drawingSlice";
 import { TileArcGISRest } from "ol/source";
-import {fetchCircleSearchResults, setSelectedEnterprises} from "@/store/slices/enterpriseSlice";
+import {fetchCircleSearchResults, fetchMapEnterpriseIds, setSelectedEnterprises} from "@/store/slices/enterpriseSlice";
 import { setSelectedEap } from "@/store/slices/eapSlice";
 import { WKT } from "ol/format";
 import { fetchGeoPortalLegend } from "@/store/slices/legendSlice";
@@ -35,6 +35,7 @@ import {Circle, Geometry, Polygon} from "ol/geom";
 import { Vector as VectorLayer } from 'ol/layer';
 import { Vector as VectorSource } from 'ol/source';
 import VectorTileLayer from "ol/layer/VectorTile";
+import {setTimeout} from "@wry/context";
 
 // Namur's geographic coordinates (WGS84)
 const namurGeoCoords = [4.8717, 50.4670];
@@ -60,6 +61,7 @@ export default function MapComponent() {
     const filterSector = useAppSelector((state) => state.enterprise.filterSector);
     const filterNace = useAppSelector((state) => state.enterprise.filterNace);
     const filterEap = useAppSelector((state) => state.enterprise.filterEap);
+    const mapEnterpriseIds = useAppSelector((state) => state.enterprise.mapEnterpriseIds);
     const drawnCircle = useRef<Circle|null>(null);
     const dispatch = useAppDispatch();
 
@@ -298,18 +300,35 @@ export default function MapComponent() {
         const enterpriseLayer = map.getLayers().getArray().find(l => l.get('title') === 'Entreprises') as VectorTileLayer
         if (!enterpriseLayer) return;
 
-        // Filter the features of the layer "Enterprise" based on the active filters
-        if (filterEntityType || filterSector || filterNace || filterEap) {
+        const currentZoom = map.getView().getZoom() as number;
+        // if zoom level is less than 14, hide the enterprise layer
+        if (currentZoom >= 14.5) {
+            const args = {
+                filterEap: filterEap,
+                filterNace: filterNace,
+                filterEntityType: filterEntityType,
+                filterSector: filterSector,
+            }
+            console.log('useEffect map component fetchMapEnterpriseIds')
+
+            dispatch(fetchMapEnterpriseIds({...args}))
+        }
+
+    }, [map, filterNace, filterEap, filterEntityType, filterSector])
+
+    useEffect(() => {
+        if (!map) return;
+        const enterpriseLayer = map.getLayers().getArray().find(l => l.get('title') === 'Entreprises') as VectorTileLayer
+        if (!enterpriseLayer) return;
+
+        if (mapEnterpriseIds.length > 0) {
             enterpriseLayer.setStyle(
                 createGetEnterpriseFeatureStyle({
-                    nace: filterNace,
-                    eap: filterEap,
-                    entityType: filterEntityType,
-                    sector: filterSector
+                    mapEnterpriseIds: new Set(mapEnterpriseIds)
                 })
             )
         }
-    }, [filterEntityType, filterSector, map])
+    }, [map, mapEnterpriseIds]);
 
     return (
         <div id="map" className="h-screen w-screen">

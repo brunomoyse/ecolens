@@ -117,6 +117,16 @@ class Query(graphene.ObjectType):
         eapId=graphene.UUID(),
         entityType=graphene.String(),
     )
+    all_enterprise_ids = graphene.List(
+        graphene.ID,
+        bbox=graphene.List(graphene.Float),
+        wkt=graphene.String(),
+        sector=graphene.Argument(SectorEnum),
+        naceMain=graphene.List(graphene.String),
+        naceLetter=graphene.String(),
+        eapId=graphene.UUID(),
+        entityType=graphene.String(),
+    )
     enterprise = graphene.Field(EnterprisesType, id=graphene.ID(required=True))
     resolver_detail_search = graphene.Field(
         DetailedSearchResponseType,
@@ -198,6 +208,72 @@ class Query(graphene.ObjectType):
     # Resolver for economical_activity_parks
     def resolve_economical_activity_parks(self, info):
         return EconomicalActivityPark.objects.all()
+
+    # Resolver for all_enterprises
+    def resolve_all_enterprise_ids(
+        self,
+        info,
+        bbox=None,
+        wkt=None,
+        sector=None,
+        naceMain=None,
+        naceLetter=None,
+        eapId=None,
+        entityType=None,
+    ):
+        queryset = Enterprises.objects.all()
+
+        # Filter by entityType
+        if entityType:
+            queryset = queryset.filter(form=entityType)
+
+        # Filter by EAP
+        if eapId:
+            queryset = queryset.filter(eap_id=eapId)
+
+        # Filter by sector
+        if sector:
+            sector_value = sector.value  # Convert EnumMeta instance to its value
+            queryset = queryset.filter(sector=sector_value)
+
+        # Filter by naceMain
+        if naceMain:
+            queryset = queryset.annotate(trimmed_value=LTrim(F("nace_main"))).filter(
+                trimmed_value__startswith=naceMain
+            )
+
+        # Filter by naceLetter (letter A-U)
+        if naceLetter:
+            queryset = queryset.filter(nace_letter=naceLetter)
+
+        # Filter on extent
+        if bbox:
+            if len(bbox) != 4:
+                raise ValueError(
+                    "The bbox must contain exactly 4 elements (min_lon, min_lat, max_lon, max_lat)"
+                )
+
+            bbox_polygon = Polygon.from_bbox(bbox)
+            bbox_polygon.srid = 4326
+            bbox_polygon.transform(31370)
+
+            queryset = queryset.filter(
+                addressenterprise__address__geom__within=bbox_polygon
+            )
+
+        elif wkt:
+            wkt_polygon = GEOSGeometry(wkt)
+
+            if not wkt_polygon.srid:
+                wkt_polygon.srid = 4326
+
+            wkt_polygon.transform(31370)
+
+            queryset = queryset.filter(
+                addressenterprise__address__geom__within=wkt_polygon
+            )
+
+        return queryset.values_list('id', flat=True)
 
     # Resolver for enterprises with simplified pagination and filters
     def resolve_enterprises(

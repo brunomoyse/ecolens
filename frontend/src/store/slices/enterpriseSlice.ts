@@ -22,6 +22,7 @@ interface EnterpriseState {
     filterNace: string | null;
     filterEntityType: string | null;
     filterSector: string | null;
+    mapEnterpriseIds: string[];
 }
 
 const initialState: EnterpriseState = {
@@ -35,6 +36,7 @@ const initialState: EnterpriseState = {
     filterNace: null,
     filterEntityType: null,
     filterSector: null,
+    mapEnterpriseIds: [],
 };
 
 export const fetchEnterprises = createAsyncThunk(
@@ -120,6 +122,61 @@ export const fetchEnterprises = createAsyncThunk(
             });
 
             return response.data.enterprises;
+        } catch (error) {
+            return rejectWithValue(error);
+        }
+    }
+);
+
+export const fetchMapEnterpriseIds = createAsyncThunk(
+    'enterprise/fetchMapEnterpriseIds',
+    async (args: any, { rejectWithValue }) => {
+        try {
+            let queryVariables: any = {
+                filterEap: args.filterEap || null,
+                filterNace: args.filterNace || null,
+                filterEntityType: args.filterEntityType || null,
+                filterSector: args.filterSector || null,
+            };
+
+            if (args.bbox) {
+                queryVariables = {
+                    ...queryVariables,
+                    bbox: args.bbox,
+                }
+            }
+
+            if (args.wkt) {
+                queryVariables = {
+                    ...queryVariables,
+                    wkt: args.wkt,
+                }
+            }
+
+            const response = await apolloClient.query({
+                query: gql`
+                    query (
+                        $bbox: [Float!], 
+                        $wkt: String,
+                        $filterEap: UUID,
+                        $filterEntityType: String,
+                        $filterSector: SectorEnum
+                        $filterNace: String
+                    ) {
+                        allEnterpriseIds(
+                            bbox: $bbox, 
+                            wkt: $wkt,
+                            eapId: $filterEap,
+                            naceLetter: $filterNace,
+                            entityType: $filterEntityType,
+                            sector: $filterSector
+                        )
+                    }
+                `,
+                variables: queryVariables,
+            });
+
+            return response.data.allEnterpriseIds;
         } catch (error) {
             return rejectWithValue(error);
         }
@@ -257,6 +314,9 @@ export const enterpriseSlice = createSlice({
             state.isEnterpriseLoading = false
             state.enterprisesData = action.payload.data
             state.enterprisesPagination = { ...action.payload.pagination };
+        });
+        builder.addCase(fetchMapEnterpriseIds.fulfilled, (state, action) => {
+            state.mapEnterpriseIds = action.payload
         });
         builder.addCase(fetchEnterprise.fulfilled, (state, action) => {
             state.selectedEnterprise = action.payload
