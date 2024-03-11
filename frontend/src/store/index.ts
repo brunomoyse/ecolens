@@ -7,14 +7,14 @@ import legendReducer from './slices/legendSlice';
 import naceCodeReducer from './slices/naceCodeSlice';
 
 export const store = configureStore({
-    reducer: {
-        drawing: drawingReducer,
-        enterprise: enterpriseReducer,
-        widget: widgetReducer,
-        eap: eapReducer,
-        legend: legendReducer,
-        naceCode: naceCodeReducer,
-    },
+	reducer: {
+		drawing: drawingReducer,
+		enterprise: enterpriseReducer,
+		widget: widgetReducer,
+		eap: eapReducer,
+		legend: legendReducer,
+		naceCode: naceCodeReducer,
+	},
 });
 
 export type RootState = ReturnType<typeof store.getState>;

@@ -1,32 +1,28 @@
 'use client';
 
 // import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
-import './globals.css'
+import { Inter } from 'next/font/google';
+import './globals.css';
 import { MapProvider } from '@/context/map-context';
-import React from "react";
+import React from 'react';
 import { store } from '@/store';
-import {Provider} from "react-redux";
+import { Provider } from 'react-redux';
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ subsets: ['latin'] });
 
 // export const metadata: Metadata = {
 //   title: 'EcoLens',
 //   description: 'EcoLens is a platform for data visualization.',
 // }
 
-export default function RootLayout({ children }: {
-    children: React.ReactNode
-}) {
-    return (
-        <html lang="en">
-            <body className={inter.className}>
-                <Provider store={store}>
-                    <MapProvider>
-                        {children}
-                    </MapProvider>
-                </Provider>
-            </body>
-        </html>
-    )
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+	return (
+		<html lang="en">
+			<body className={inter.className}>
+				<Provider store={store}>
+					<MapProvider>{children}</MapProvider>
+				</Provider>
+			</body>
+		</html>
+	);
 }

@@ -8,33 +8,33 @@ import Stroke from 'ol/style/Stroke';
 
 // Function to create a GeoJSON layer
 const createGeoJsonLayer = (
-    geoJsonUrl: string,
-    title: string,
-    zIndex: number,
-    polygonStyle: Style = defaultPolygonStyle,
+	geoJsonUrl: string,
+	title: string,
+	zIndex: number,
+	polygonStyle: Style = defaultPolygonStyle,
 ) => {
-    const layer = new VectorLayer({
-        source: new VectorSource({
-            url: geoJsonUrl,
-            format: new GeoJSON(),
-        }),
-        style: polygonStyle,
-    });
+	const layer = new VectorLayer({
+		source: new VectorSource({
+			url: geoJsonUrl,
+			format: new GeoJSON(),
+		}),
+		style: polygonStyle,
+	});
 
-    layer.set('title', title);
+	layer.set('title', title);
 
-    return layer;
+	return layer;
 };
 
 // Default styles
 const defaultPolygonStyle = new Style({
-    fill: new Fill({
-        color: 'rgba(139, 0, 0, 0)'
-    }),
-    stroke: new Stroke({
-        color: 'rgba(0, 0, 0, 1)',
-        width: 2
-    })
+	fill: new Fill({
+		color: 'rgba(139, 0, 0, 0)',
+	}),
+	stroke: new Stroke({
+		color: 'rgba(0, 0, 0, 1)',
+		width: 2,
+	}),
 });
 
 export { createGeoJsonLayer, defaultPolygonStyle };
