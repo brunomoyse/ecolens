@@ -32,9 +32,8 @@ const PreviewCardMap: React.FC<PreviewCardMapProps> = ({ coordinate }) => {
         <div style={positionStyle} className="absolute z-10 p-1 bg-gray-100">
             <ScrollArea className={`${selectedEnterprises.length > 4 ? 'h-48' : 'h-auto'} rounded-md border`}>
                 <div className="p-2">
-                    {/* @todo replace establishment_number with camelCase + use TS when will be fetched from graphql instead of Martin */}
                     {selectedEnterprises.map((enterprise: any, index) => (
-                        <div key={enterprise.establishment_number}>
+                        <div key={enterprise.id}>
                             <div onClick={() => handleSelectEnterprise(enterprise)} className="flex text-md items-center px-2 py-1 hover:bg-gray-300 rounded-lg cursor-pointer">
                                 {enterprise.name}
                             </div>
