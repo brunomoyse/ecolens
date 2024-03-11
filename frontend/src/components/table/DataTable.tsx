@@ -288,7 +288,7 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
                     ) : (
                         <TableRow>
                             <TableCell colSpan={columns.length} className="h-24 text-center">
-                                Erreur lors du chargement des données.
+                                Aucune donnée disponible.
                             </TableCell>
                         </TableRow>
                     )}
