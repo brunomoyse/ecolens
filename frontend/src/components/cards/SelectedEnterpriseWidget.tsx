@@ -56,7 +56,10 @@ export default function SelectedEnterpriseWidget() {
                             <li><strong>Secteur
                                 d&apos;activité:</strong> {getSectorTranslation(selectedEnterprise.sector!)}</li>
                             <li><strong>NACE principal:</strong> {selectedEnterprise.naceMain}</li>
-                            <li><strong>Autres NACE:</strong> {selectedEnterprise.naceOther}</li>
+                            <li><strong>Autres NACE:</strong> {selectedEnterprise.naceOther?.map(n => {
+                                return <span key={n}> {n} </span>
+                            })}
+                            </li>
                             <li><strong>Indice fiabilité:</strong> {selectedEnterprise.reliabilityIndex}/10</li>
                             {selectedEnterprise.economicalActivityPark && (
                                 <li><strong>PAE:</strong> {selectedEnterprise.economicalActivityPark.name}</li>
