@@ -37,16 +37,6 @@ class InputSource(models.Model):
         return last_update
 
 
-class Layer(models.Model):
-    name = models.CharField(max_length=255)
-    url = models.URLField(max_length=255)
-
-
-class View(models.Model):
-    center = models.PointField()
-    zoom_level = models.IntegerField(default=10)
-    is_default = models.BooleanField(default=False)
-
 class EconomicalActivityPark(models.Model):
     id = models.UUIDField(primary_key=True)
     name = models.TextField(blank=True, null=True, db_column="LIBELLE")
@@ -57,8 +47,6 @@ class EconomicalActivityPark(models.Model):
         managed = False
         db_table = '"ingestion"."pre_geoportail"'
 
-    #def __str__(self):
-    #    return self.name
 
 class Enterprises(models.Model):
     """Final enterprises (displayed on the map)"""
