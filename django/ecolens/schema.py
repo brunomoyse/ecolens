@@ -4,7 +4,7 @@ import json
 import graphene
 from graphene_django import DjangoObjectType
 from django.contrib.gis.geos import Polygon, GEOSGeometry
-from api.models import Layer, Enterprises, EconomicalActivityPark, WalloniaPlots, NaceCode
+from api.models import Enterprises, EconomicalActivityPark, WalloniaPlots, NaceCode
 from django.db.models import Q, F, IntegerField
 from django.db.models.functions import LTrim, Cast
 from django.contrib.gis.db.models.functions import Distance
@@ -74,12 +74,6 @@ class DetailedSearchResponseType(graphene.ObjectType):
     eaps = graphene.List(EconomicalActivityParkType)
     plots = graphene.List(WalloniaPlotsType)
 
-# Layer
-class LayerType(DjangoObjectType):
-    class Meta:
-        model = Layer
-        fields = ("id", "name", "url")
-
 # Enum for Sector
 class SectorEnum(graphene.Enum):
     PRIMARY = "PRIMARY"
@@ -101,8 +95,6 @@ class EnterprisesWithPagination(graphene.ObjectType):
 
 # Define the main Query ObjectType
 class Query(graphene.ObjectType):
-    all_layers = graphene.List(LayerType)
-    layer_by_id = graphene.Field(LayerType, id=graphene.Int(required=True))
     nace_codes = graphene.List(NaceCodeType)
     economical_activity_parks = graphene.List(EconomicalActivityParkType)
     enterprises = graphene.Field(
@@ -189,17 +181,6 @@ class Query(graphene.ObjectType):
             eaps=list(eaps_list),
             plots=list(wallonia_plots_list)
         )
-
-    # Resolver for all_layers
-    def resolve_all_layers(self, info):
-        return Layer.objects.all()
-
-    # Resolver for layer_by_id
-    def resolve_layer_by_id(self, info, id):
-        try:
-            return Layer.objects.get(pk=id)
-        except Layer.DoesNotExist:
-            return None
 
     # Resolver for nace_codes
     def resolve_nace_codes(self, info):
