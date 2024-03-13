@@ -3,6 +3,7 @@
 from django.contrib.postgres.fields import ArrayField
 from django.contrib.gis.db import models
 
+
 class InputSourceUpdate(models.Model):
     class Status(models.TextChoices):
         SUCCESS = "success", "Success"
@@ -22,7 +23,7 @@ class InputSourceUpdate(models.Model):
 class InputSource(models.Model):
     class Types(models.TextChoices):
         GEOJSON = "json", "Geojson"
-        SHAPEFILEZ = "shpz", "ShapefileZipped" # a zipped shapefile
+        SHAPEFILEZ = "shpz", "ShapefileZipped"  # a zipped shapefile
 
     type = models.CharField(max_length=4, choices=Types.choices, default=Types.GEOJSON)
 
@@ -70,10 +71,16 @@ class Enterprises(models.Model):
     name_short = models.TextField(blank=True, null=True)
     form = models.TextField(blank=True, null=True)
     start_date = models.DateField(blank=True, null=True)
-    nace_main = ArrayField(models.TextField(blank=True), blank=True, null=True, default=list)
-    nace_other = ArrayField(models.TextField(blank=True), blank=True, null=True, default=list)
+    nace_main = ArrayField(
+        models.TextField(blank=True), blank=True, null=True, default=list
+    )
+    nace_other = ArrayField(
+        models.TextField(blank=True), blank=True, null=True, default=list
+    )
     nace_letter = models.TextField(blank=True, null=True)
-    sector = models.CharField(max_length=10, blank=True, null=True, choices=Sector.choices)
+    sector = models.CharField(
+        max_length=10, blank=True, null=True, choices=Sector.choices
+    )
     address_extra = models.TextField(blank=True, null=True)
     website = models.TextField(blank=True, null=True)
     email = models.TextField(blank=True, null=True)
@@ -84,12 +91,12 @@ class Enterprises(models.Model):
     geom = models.GeometryField(blank=True, srid=31370)
     # Linked objects
     eap = models.ForeignKey(
-    'EconomicalActivityPark',
+        "EconomicalActivityPark",
         on_delete=models.CASCADE,
-        db_column='eap_id',
-        related_name='enterprises',
+        db_column="eap_id",
+        related_name="enterprises",
         null=True,
-        blank=True
+        blank=True,
     )
 
     class Meta:
@@ -128,6 +135,7 @@ class AddressEnterprise(models.Model):
         managed = False
         db_table = "address_enterprise"
 
+
 class WalloniaPlots(models.Model):
     capakey = models.TextField(primary_key=True)
     geom = models.GeometryField(blank=True, srid=31370, db_column="geometry")
@@ -136,14 +144,16 @@ class WalloniaPlots(models.Model):
         managed = False
         db_table = '"plots"."wallonia"'
 
+
 class NaceCodeManager(models.Manager):
     def get_queryset(self):
         # Override the default queryset to apply specific filters
-        return super().get_queryset().filter(
-            code__regex=r'^[A-Za-z]+$',
-            category='Nace2008',
-            language='FR'
+        return (
+            super()
+            .get_queryset()
+            .filter(code__regex=r"^[A-Za-z]+$", category="Nace2008", language="FR")
         )
+
 
 class NaceCode(models.Model):
     code = models.TextField(primary_key=True)
